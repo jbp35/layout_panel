@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/layout_panel" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
