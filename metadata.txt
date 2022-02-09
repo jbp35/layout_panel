@@ -5,13 +5,12 @@
 [general]
 name=Layout Panel
 qgisMinimumVersion=3.0
-description=Add a panel to manage layouts without blocking the main interface
+description=Add a panel to manage layouts directly from QGIS main window
 version=0.1
 author=Atelier JBP
 email=jbpeter@outlook.com
 
-about=This plugin adds a new panel to manage print layouts in a non-blocking maner. It allows to create, rename, delete and filter the list of print layouts. It also makes it possible to batch export multiple layouts to PDF, Image or SVG format.
-
+about=This plugin adds a new panel to manage print layouts directly from QGIS main window. It allows to quickly open, create, rename, delete and filter print layouts without having to open the layout manager. It supports layout templates and also makes it possible to batch export one or multiple layouts to PDF, Image or SVG formats without having to open each print layout.
 tracker=http://bugs
 repository=http://repo
 # End of mandatory metadata
@@ -23,7 +22,7 @@ hasProcessingProvider=no
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=Layout, Panel, Composition, batch, export, PDF, SVG, Image, Manager
+tags=Layout, manager, panel, print, composition, batch, export, template
 
 homepage=http://homepage
 category=Plugins
