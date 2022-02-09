@@ -1,4 +1,5 @@
 [MASTER]
+extension-pkg-whitelist=PyQt5,qgis
 
 # Specify a configuration file.
 #rcfile=
