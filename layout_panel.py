@@ -74,7 +74,6 @@ class LayoutPanel:
         self.dockwidget = None
 
 
-    # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
 
@@ -97,7 +96,7 @@ class LayoutPanel:
         callback,
         enabled_flag=True,
         add_to_menu=True,
-        add_to_toolbar=True,
+        add_to_toolbar=False,
         status_tip=None,
         whats_this=None,
         parent=None):
@@ -163,7 +162,6 @@ class LayoutPanel:
 
         return action
 
-
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
@@ -174,29 +172,16 @@ class LayoutPanel:
             callback=self.run,
             parent=self.iface.mainWindow())
 
-    #--------------------------------------------------------------------------
 
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
-        #print "** CLOSING LayoutPanel"
-
-        # disconnects
         self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
-
-        # remove this statement if dockwidget is to remain
-        # for reuse if plugin is reopened
-        # Commented next statement since it causes QGIS crashe
-        # when closing the docked window:
-        # self.dockwidget = None
-
         self.pluginIsActive = False
 
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
-
-        #print "** UNLOAD LayoutPanel"
 
         for action in self.actions:
             self.iface.removePluginMenu(
@@ -206,7 +191,6 @@ class LayoutPanel:
         # remove the toolbar
         del self.toolbar
 
-    #--------------------------------------------------------------------------
 
     def run(self):
         """Run method that loads and starts the plugin"""
@@ -214,19 +198,9 @@ class LayoutPanel:
         if not self.pluginIsActive:
             self.pluginIsActive = True
 
-            #print "** STARTING LayoutPanel"
-
-            # dockwidget may not exist if:
-            #    first run of plugin
-            #    removed on close (see self.onClosePlugin method)
             if self.dockwidget == None:
-                # Create the dockwidget (after translation) and keep reference
                 self.dockwidget = LayoutPanelDockWidget(self.iface)
 
-            # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
-
-            # show the dockwidget
-            # TODO: fix to allow choice of dock location
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
