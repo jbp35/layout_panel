@@ -37,9 +37,11 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     closingPlugin = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, iface, parent=None):
         super(LayoutPanelDockWidget, self).__init__(parent)
         self.setupUi(self)
+
+        self.iface = iface
 
         self.layoutNameRename = None
 
