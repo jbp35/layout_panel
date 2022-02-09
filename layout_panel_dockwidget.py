@@ -43,55 +43,54 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         self.iface = iface
 
-        self.layoutNameRename = None
+        # Used to store the initial name of the layout before entering editor mode
+        self.name_before_rename = None
 
         self.pbCreateLayout.clicked.connect(self.createNewLayout)
         self.pbDeleteLayout.clicked.connect(self.removeSelectedLayouts)
         self.listWidget.itemDoubleClicked.connect(self.openLayoutEditor)
+        self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listWidget.customContextMenuRequested.connect(self.openContextMenu)
+        self.listWidget.itemDelegate().closeEditor.connect(self.renameLayoutClosedEditor)
         self.mLineEdit.valueChanged.connect(self.updateLayoutWidgetList)
 
         QgsProject.instance().readProject.connect(self.updateProjectInstance)
         QgsProject.instance().cleared.connect(self.updateProjectInstance)
-
         QgsProject.instance().layoutManager().layoutAdded.connect(self.updateLayoutWidgetList)
         QgsProject.instance().layoutManager().layoutRemoved.connect(self.updateLayoutWidgetList)
         QgsProject.instance().layoutManager().layoutRenamed.connect(self.updateLayoutWidgetList)
 
-        self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.listWidget.customContextMenuRequested.connect(self.openContextMenu)
-        self.listWidget.itemDelegate().closeEditor.connect(self.renameLayoutClosedEditor)
-
-        # Wath template project folder for changes
+        # Watch layout template folder for changes
         projectTemplateDir = QDir(QgsApplication.qgisSettingsDirPath())
         projectTemplateDir.cd('composer_templates')
         self.watchFolder = QFileSystemWatcher([projectTemplateDir.absolutePath()])
         self.watchFolder.directoryChanged.connect(self.updateTemplateMenu)
         self.watchFolder.fileChanged.connect(self.updateTemplateMenu)
 
+        # Initialise project, layout list and template menu
         self.updateProjectInstance()
-        self.updateTemplateMenu()
         self.updateLayoutWidgetList()
-
+        self.updateTemplateMenu()
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
         event.accept()
 
-
     def updateProjectInstance(self):
+        """Update project instance and project layout manager"""
         self.mLineEdit.clearValue()
         self.projectInstance = QgsProject.instance()
         self.projectLayoutManager = self.projectInstance.layoutManager()
         self.updateLayoutWidgetList()
 
-
-    def updateLayoutWidgetList(self): # Regenerate the list of layouts
+    def updateLayoutWidgetList(self):
+        """Regenerate the list of layouts"""
         layoutlist = self.projectLayoutManager.layouts()
         self.listWidget.clear()
-        searchvalue = self.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(").replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
+        search_value = self.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(").replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
         for layout in layoutlist:
             layout.pageCollection().changed.connect(self.updateLayoutWidgetList) # necessary to ensure that tooltips are updated when layout format or page count changes
-            match = bool(re.search(searchvalue,layout.name(), re.IGNORECASE))
+            match = bool(re.search(search_value,layout.name(), re.IGNORECASE))
             if match:
                 layout = self.projectLayoutManager.layoutByName(layout.name())
                 LayoutPageCollection = layout.pageCollection()
@@ -110,7 +109,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 item.setToolTip(f'Page count: {pageCount} <br> Page Size: {pageSizeTooltip}')
                 self.listWidget.addItem(item)
 
-    def updateTemplateMenu(self): # Generate the template menu
+    def updateTemplateMenu(self):
+        """Generate the template menu"""
         projectTemplateDir = QDir(QgsApplication.qgisSettingsDirPath())
         projectTemplateDir.cd('composer_templates')
         projectTemplateDir.setFilter(QDir.Files)
@@ -139,8 +139,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.tbTemplateMenu.setMenu(menu)
         menu.triggered.connect(self.templateMenuTriggered)
 
-
-    def templateMenuTriggered(self,layoutTemplateAction): # Called when action in template menu is triggered
+    def templateMenuTriggered(self,layoutTemplateAction):
+        """Called when action in template menu is triggered"""
         if layoutTemplateAction.data()[0] == "openTemplateFolderAction" :
             QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(layoutTemplateAction.data()[1]))
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
@@ -150,8 +150,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         elif layoutTemplateAction.data()[0] == "layoutTemplateAction":
             self.createLayoutFromTemplate(layoutTemplateAction.data()[1])
 
-
-    def createLayoutFromTemplate(self, layoutTemplatePath): # Create a new layout based on a template file
+    def createLayoutFromTemplate(self, layoutTemplatePath):
+        """Create a new layout based on a template file"""
         document = QtXml.QDomDocument()
         with open(layoutTemplatePath) as file:
             content = file.read()
@@ -168,8 +168,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return
             iterator = iterator + 1
 
-
-    def openContextMenu(self, position): # Create the contextual menu
+    def openContextMenu(self, position):
+        """Create the contextual menu"""
         selectedLayouts = self.listWidget.selectedItems()
         if len(selectedLayouts)==0: #Context menu if no layout is selected
             menu = QtWidgets.QMenu()
@@ -228,13 +228,13 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 print("Code not found")
 
-
-    def openCurrentLayout(self): #Open currently selected layout in editor
+    def openCurrentLayout(self):
+        """Open currently selected layout in editor"""
         layout = self.projectLayoutManager.layoutByName(self.listWidget.selectedItems()[0].text())
         self.iface.openLayoutDesigner(layout)
 
-
-    def exportLayoutPDF(self): #Export one or multiple layouts to PDF file
+    def exportLayoutPDF(self):
+        """Export one or multiple layouts to PDF file"""
         default_extension = '.pdf'
         extension_filter = 'PDF files (*.pdf *.PDF)'
         default_filter = 'PDF files (*.pdf *.PDF)'
@@ -269,8 +269,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
-
-    def exportLayoutImage(self): #Export one or multiple layouts to image file
+    def exportLayoutImage(self):
+        """Export one or multiple layouts to image file"""
         default_extension = '.png'
         extension_filter = 'PNG format (*.png *.PNG);;BMP format (*.bmp *.BMP);;CUR format (*.cur *.CUR);;ICNS format (*.icns *.ICNS);;ICO format (*.ico *.ICO)' \
                            'JPEG format (*.jpeg *.JPEG);;JPG format (*.jpg *.JPG);;PBM format (*.pbm *.PBM);;PGM format (*.pgm *.PGM);;PPM format (*.ppm *.PPM)' \
@@ -307,8 +307,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
-
-    def exportLayoutSvg(self): #Export one or multiple layouts to SVG file
+    def exportLayoutSvg(self):
+        """Export one or multiple layouts to SVG file"""
         default_extension = '.svg'
         extension_filter = 'SVG format (*.svg *.SVG)'
         default_filter = 'SVG format (*.svg *.SVG)'
@@ -343,13 +343,13 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
-
-    def openLayoutEditor(self, item): # Open the selected layout in editor
+    def openLayoutEditor(self, item):
+        """Open the selected layout in editor"""
         layout = self.projectLayoutManager.layoutByName(item.text())
         self.iface.openLayoutDesigner(layout)
 
-
-    def createNewLayout(self): # Create a new blank layout
+    def createNewLayout(self):
+        """Create a new blank layout"""
         iterator = 1
         while True:
             if self.projectLayoutManager.layoutByName('Layout ' + str(iterator)) is None :
@@ -362,8 +362,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return
             iterator = iterator + 1
 
-
-    def duplicateLayout(self): # Duplicate one or multiple selected layouts
+    def duplicateLayout(self):
+        """Duplicate one or multiple selected layouts"""
         selectedItems = self.listWidget.selectedItems()
         listLayoutNames = []
         for layoutItem in selectedItems: listLayoutNames.append(layoutItem.text())
@@ -377,25 +377,24 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     return
                 iterator = iterator + 1
 
-
-    def renameLayout(self): # Open editor mode to rename currently selected layout
-        self.layoutNameRename = self.listWidget.selectedItems()[0].text()
+    def renameLayout(self):
+        """Open editor mode to rename currently selected layout"""
+        self.name_before_rename = self.listWidget.selectedItems()[0].text()
         self.listWidget.editItem(self.listWidget.selectedItems()[0])
 
-
-    def renameLayoutClosedEditor(self, QListWidgetItem): # This function is called when editor mode is closed
+    def renameLayoutClosedEditor(self, QListWidgetItem):
+        """This function is called when editor mode is closed"""
         if self.projectLayoutManager.layoutByName(QListWidgetItem.text()) is None and QListWidgetItem.text() != "":
-            if self.layoutNameRename != QListWidgetItem.text():
-                layout = self.projectLayoutManager.layoutByName(self.layoutNameRename)
+            if self.name_before_rename != QListWidgetItem.text():
+                layout = self.projectLayoutManager.layoutByName(self.name_before_rename)
                 layout.setName(QListWidgetItem.text())
         else:
-            if self.layoutNameRename != QListWidgetItem.text():
+            if self.name_before_rename != QListWidgetItem.text():
                 self.iface.messageBar().pushWarning('Failed to rename layout',' Entered layout name already exists or is invalid.')
         self.updateLayoutWidgetList()
 
-
-
-    def removeSelectedLayouts(self): # Remove one or mutliple selected layouts
+    def removeSelectedLayouts(self):
+        """Remove one or multiple selected layouts"""
         selectedLayouts = self.listWidget.selectedItems()
         qm = QtWidgets.QMessageBox
         if len(selectedLayouts) == 0: return
@@ -408,7 +407,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             for layoutNames in listLayoutNames:
                 self.projectLayoutManager.removeLayout(self.projectLayoutManager.layoutByName(layoutNames))
 
-    def saveAsTemplate(self): #Save selected layout as template
+    def saveAsTemplate(self):
+        """Save selected layout as template"""
         projectTemplateDir=QgsApplication.qgisSettingsDirPath()
         lastUsedFolder = QDir(projectTemplateDir)
         lastUsedFolder.cd('composer_templates')
