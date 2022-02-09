@@ -1,5 +1,17 @@
 <RCC>
-    <qresource prefix="/plugins/layout_panel" >
-        <file>icon.png</file>
-    </qresource>
+  <qresource prefix="/plugins/layout_panel">
+    <file>icons/mActionDeleteSelected.svg</file>
+    <file>icons/mActionDuplicateLayout.svg</file>
+    <file>icons/mActionFilePrint.svg</file>
+    <file>icons/mActionFileSaveAs.svg</file>
+    <file>icons/mActionFilter2.svg</file>
+    <file>icons/mActionLayoutManager.svg</file>
+    <file>icons/mActionNewLayout.svg</file>
+    <file>icons/mActionSaveAsPDF.svg</file>
+    <file>icons/mActionSaveAsSVG.svg</file>
+    <file>icons/mActionSaveMapAsImage.svg</file>
+    <file>icons/mIconFolder.svg</file>
+    <file>icons/mIconLayout.svg</file>
+    <file>icon.png</file>
+  </qresource>
 </RCC>

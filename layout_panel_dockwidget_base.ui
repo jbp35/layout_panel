@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LayoutPluginDockWidgetBase</class>
- <widget class="QDockWidget" name="LayoutPluginDockWidgetBase">
+ <class>LayoutPanelDockWidgetBase</class>
+ <widget class="QDockWidget" name="LayoutPanelDockWidgetBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -48,7 +48,7 @@
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/plugins/LayoutPlugin/icons/mActionNewLayout.svg</normaloff>:/plugins/LayoutPlugin/icons/mActionNewLayout.svg</iconset>
+          <normaloff>:/plugins/layout_panel/icons/mActionNewLayout.svg</normaloff>:/plugins/layout_panel/icons/mActionNewLayout.svg</iconset>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
@@ -68,7 +68,7 @@
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/plugins/LayoutPlugin/icons/mIconFolder.svg</normaloff>:/plugins/LayoutPlugin/icons/mIconFolder.svg</iconset>
+          <normaloff>:/plugins/layout_panel/icons/mIconFolder.svg</normaloff>:/plugins/layout_panel/icons/mIconFolder.svg</iconset>
         </property>
         <property name="popupMode">
          <enum>QToolButton::InstantPopup</enum>
@@ -88,7 +88,7 @@
         </property>
         <property name="icon">
          <iconset resource="resources.qrc">
-          <normaloff>:/plugins/LayoutPlugin/icons/mActionDeleteSelected.svg</normaloff>:/plugins/LayoutPlugin/icons/mActionDeleteSelected.svg</iconset>
+          <normaloff>:/plugins/layout_panel/icons/mActionDeleteSelected.svg</normaloff>:/plugins/layout_panel/icons/mActionDeleteSelected.svg</iconset>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
