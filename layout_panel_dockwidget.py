@@ -421,13 +421,13 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fname[0]).toString(),QDir.toNativeSeparators(fname[0]))
                 self.iface.messageBar().pushSuccess('Ave as Template', ' Successfully saved layout template to ' + href)
 
+
+
+#TODO: change plugin icon
+#TODO: Export as background task
 #TODO: update statusbar
 #TODO: translation TR
-#TODO: create new from template
-#TODO: add duplicate layout button
-#TODO: Filter button?
-#TODO: plugin icon & informations
-#TODO: Export as background task
-#TODO: Support for reports
+#TODO: Filter button? filter by size, page count, preset, etc.
+#TODO: Add support for reports
 #TODO: Support for drag & drop
 #TODO: quick print layout?
