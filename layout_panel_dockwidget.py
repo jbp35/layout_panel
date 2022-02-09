@@ -424,10 +424,14 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
 
 #TODO: change plugin icon
+#TODO: review code
 #TODO: Export as background task
 #TODO: update statusbar
 #TODO: translation TR
-#TODO: Filter button? filter by size, page count, preset, etc.
+#TODO: open github repo
+#TODO: Separate code logic from gui?
+#TODO: Filter tool button? filter by size, page count, expression, etc.
 #TODO: Add support for reports
 #TODO: Support for drag & drop
 #TODO: quick print layout?
+#TODO: icons for layout templates
