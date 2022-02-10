@@ -48,7 +48,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         self.pbCreateLayout.clicked.connect(self.createNewLayout)
         self.pbDeleteLayout.clicked.connect(self.removeSelectedLayouts)
-        self.listWidget.itemDoubleClicked.connect(self.openLayoutEditor)
+        self.listWidget.itemDoubleClicked.connect(self.openCurrentLayout)
         self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.renameLayoutClosedEditor)
@@ -61,9 +61,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         QgsProject.instance().layoutManager().layoutRenamed.connect(self.updateLayoutWidgetList)
 
         # Watch layout template folder for changes
-        projectTemplateDir = QDir(QgsApplication.qgisSettingsDirPath())
-        projectTemplateDir.cd('composer_templates')
-        self.watchFolder = QFileSystemWatcher([projectTemplateDir.absolutePath()])
+        self.template_dir = QDir(QgsApplication.qgisSettingsDirPath() + '/composer_templates')
+        self.watchFolder = QFileSystemWatcher([self.template_dir.absolutePath()])
         self.watchFolder.directoryChanged.connect(self.updateTemplateMenu)
         self.watchFolder.fileChanged.connect(self.updateTemplateMenu)
 
@@ -78,6 +77,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def updateProjectInstance(self):
         """Update project instance and project layout manager"""
+        self.template_dir = QDir(QgsApplication.qgisSettingsDirPath() + '/composer_templates')
         self.mLineEdit.clearValue()
         self.projectInstance = QgsProject.instance()
         self.projectLayoutManager = self.projectInstance.layoutManager()
@@ -85,28 +85,30 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def updateLayoutWidgetList(self):
         """Regenerate the list of layouts"""
-        layoutlist = self.projectLayoutManager.layouts()
+        layout_list = self.projectLayoutManager.layouts()
         self.listWidget.clear()
-        search_value = self.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(").replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
-        for layout in layoutlist:
-            layout.pageCollection().changed.connect(self.updateLayoutWidgetList) # necessary to ensure that tooltips are updated when layout format or page count changes
-            match = bool(re.search(search_value,layout.name(), re.IGNORECASE))
+        search_value = self.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(")\
+            .replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
+        for layout in layout_list:
+            # necessary to ensure that tooltips are updated when layout format or page count changes
+            layout.pageCollection().changed.connect(self.updateLayoutWidgetList)
+            match = bool(re.search(search_value, layout.name(), re.IGNORECASE))
             if match:
                 layout = self.projectLayoutManager.layoutByName(layout.name())
-                LayoutPageCollection = layout.pageCollection()
-                pageCount = LayoutPageCollection.pageCount()
-                if LayoutPageCollection.hasUniformPageSizes():
-                    pageSize = LayoutPageCollection.maximumPageSize()
+                layout_page_collection = layout.pageCollection()
+                page_count = layout_page_collection.pageCount()
+                if layout_page_collection.hasUniformPageSizes():
+                    page_size = layout_page_collection.maximumPageSize()
                     units = QgsUnitTypes.encodeUnit(layout.units())
-                    pageSizeTooltip = f'{pageSize.width()}x{pageSize.height()} {units}'
+                    page_size_text = f'{page_size.width()}x{page_size.height()} {units}'
                 else:
-                    pageSizeTooltip = 'variable'
+                    page_size_text = 'variable'
 
                 item = QtWidgets.QListWidgetItem()
                 item.setText(layout.name())
                 item.setIcon(QtGui.QIcon(':/plugins/layout_panel/icons/mIconLayout.svg'))
                 item.setFlags(item.flags() | Qt.ItemIsEditable)
-                item.setToolTip(f'Page count: {pageCount} <br> Page Size: {pageSizeTooltip}')
+                item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text}')
                 self.listWidget.addItem(item)
 
     def updateTemplateMenu(self):
@@ -122,7 +124,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         menu = QtWidgets.QMenu()
         if not layoutTemplateList:
-            layoutTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"),'Template folder is empty')
+            layoutTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), 'Template folder is empty')
             layoutTemplateAction.setEnabled(False)
         actions = []
         for layoutTemplatePath in layoutTemplateList:
@@ -134,218 +136,102 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         menu.addSeparator()
         selectTemplateAction = menu.addAction("Choose Another Template File...")
         selectTemplateAction.setData(["selectTemplateAction", projectTemplateDir.absolutePath()])
-        openTemplateFolderAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"),"Open Template Folder")
+        openTemplateFolderAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Template Folder")
         openTemplateFolderAction.setData(["openTemplateFolderAction",projectTemplateDir.absolutePath()])
         self.tbTemplateMenu.setMenu(menu)
         menu.triggered.connect(self.templateMenuTriggered)
 
-    def templateMenuTriggered(self,layoutTemplateAction):
+    def templateMenuTriggered(self, layoutTemplateAction):
         """Called when action in template menu is triggered"""
-        if layoutTemplateAction.data()[0] == "openTemplateFolderAction" :
+        if layoutTemplateAction.data()[0] == "openTemplateFolderAction":
             QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(layoutTemplateAction.data()[1]))
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
-            fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a template to create a new layout',layoutTemplateAction.data()[1],'Layout templates (*.qpt *.QPT)')
+            fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a template to create a new layout', layoutTemplateAction.data()[1], 'Layout templates (*.qpt *.QPT)')
             if fname[0] != '':
                 self.createLayoutFromTemplate(fname[0])
         elif layoutTemplateAction.data()[0] == "layoutTemplateAction":
             self.createLayoutFromTemplate(layoutTemplateAction.data()[1])
 
-    def createLayoutFromTemplate(self, layoutTemplatePath):
-        """Create a new layout based on a template file"""
-        document = QtXml.QDomDocument()
-        with open(layoutTemplatePath) as file:
-            content = file.read()
-        document.setContent(content)
-        templateName = QFileInfo(layoutTemplatePath).baseName()
-        iterator = 1
-        while True:
-            if self.projectLayoutManager.layoutByName(templateName + ' ' + str(iterator)) is None :
-                layout = QgsPrintLayout(self.projectInstance)
-                layoutName = templateName + ' ' + str(iterator)
-                layout.loadFromTemplate(document, QgsReadWriteContext())
-                layout.setName(layoutName)
-                self.projectLayoutManager.addLayout(layout)
-                return
-            iterator = iterator + 1
-
     def openContextMenu(self, position):
         """Create the contextual menu"""
         selectedLayouts = self.listWidget.selectedItems()
-        if len(selectedLayouts)==0: #Context menu if no layout is selected
+        if len(selectedLayouts) == 0: # Context menu if no layout is selected
             menu = QtWidgets.QMenu()
             newLayoutAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), "New Print Layout")
             menu.addSeparator()
             exportMenu = menu.addMenu("Export All Layouts as...")
-            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"),"Export as PDF")
-            exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"),"Export as Image")
-            exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"),"Export as SVG")
+            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
+            exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
+            exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"), "Export as SVG")
             action = menu.exec_(self.listWidget.mapToGlobal(position))
-            if action == newLayoutAction: self.createNewLayout()
-            elif action == exportPDFAction: self.exportLayoutPDF()
-            elif action == exportImageAction:self.exportLayoutImage()
-            elif action == exportSvgAction:self.exportLayoutSvg()
+            if action == newLayoutAction:
+                self.createNewLayout()
+            elif action == exportPDFAction:
+                self.exportLayoutPDF()
+            elif action == exportImageAction:
+                self.exportLayoutImage()
+            elif action == exportSvgAction:
+                self.exportLayoutSvg()
 
-        elif len(selectedLayouts)==1: #Context menu if only one layout is selected
+        elif len(selectedLayouts) == 1: # Context menu if only one layout is selected
             menu = QtWidgets.QMenu()
-            openAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconLayout.svg"),"Open Layout")
-            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"),"Remove Layout...")
+            openAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconLayout.svg"), "Open Layout")
+            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"), "Remove Layout...")
             duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDuplicateLayout.svg"), "Duplicate Layout")
             renameAction = menu.addAction(QtGui.QIcon(""),"Rename Layout")
             menu.addSeparator()
             saveAsTemplateAction = menu.addAction(QtGui.QIcon(""), "Save as Template...")
             menu.addSeparator()
             exportMenu=menu.addMenu("Export Layout as...")
-            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"),"Export as PDF")
+            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
             exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
             exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"), "Export as SVG")
             action = menu.exec_(self.listWidget.mapToGlobal(position))
-            if action == removeAction: self.removeSelectedLayouts()
-            elif action == openAction: self.openCurrentLayout()
-            elif action == duplicateAction: self.duplicateLayout()
-            elif action == renameAction: self.renameLayout()
-            elif action == saveAsTemplateAction: self.saveAsTemplate()
-            elif action == exportPDFAction: self.exportLayoutPDF()
-            elif action == exportImageAction: self.exportLayoutImage()
-            elif action == exportSvgAction: self.exportLayoutSvg()
+            if action == removeAction:
+                self.removeSelectedLayouts()
+            elif action == openAction:
+                self.openCurrentLayout()
+            elif action == duplicateAction:
+                self.duplicateLayout()
+            elif action == renameAction:
+                self.renameLayout()
+            elif action == saveAsTemplateAction:
+                self.saveAsTemplate()
+            elif action == exportPDFAction:
+                self.exportLayoutPDF()
+            elif action == exportImageAction:
+                self.exportLayoutImage()
+            elif action == exportSvgAction:
+                self.exportLayoutSvg()
             else:
                 print("Code not found")
 
-        else: #Context menu if multiple layouts are selected
+        else: # Context menu if multiple layouts are selected
             menu = QtWidgets.QMenu()
-            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"),"Remove Layouts...")
-            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDuplicateLayout.svg"),"Duplicate Layouts")
+            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"), "Remove Layouts...")
+            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDuplicateLayout.svg"), "Duplicate Layouts")
             menu.addSeparator()
             exportMenu = menu.addMenu("Export Layouts as...")
             exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
             exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
             exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"),"Export as SVG")
             action = menu.exec_(self.listWidget.mapToGlobal(position))
-            if action == removeAction: self.removeSelectedLayouts()
-            elif action == duplicateAction:self.duplicateLayout()
-            elif action == exportPDFAction:self.exportLayoutPDF()
-            elif action == exportImageAction: self.exportLayoutImage()
-            elif action == exportSvgAction: self.exportLayoutSvg()
+            if action == removeAction:
+                self.removeSelectedLayouts()
+            elif action == duplicateAction:
+                self.duplicateLayout()
+            elif action == exportPDFAction:
+                self.exportLayoutPDF()
+            elif action == exportImageAction:
+                self.exportLayoutImage()
+            elif action == exportSvgAction:
+                self.exportLayoutSvg()
             else:
-                print("Code not found")
+                return
 
     def openCurrentLayout(self):
         """Open currently selected layout in editor"""
         layout = self.projectLayoutManager.layoutByName(self.listWidget.selectedItems()[0].text())
-        self.iface.openLayoutDesigner(layout)
-
-    def exportLayoutPDF(self):
-        """Export one or multiple layouts to PDF file"""
-        default_extension = '.pdf'
-        extension_filter = 'PDF files (*.pdf *.PDF)'
-        default_filter = 'PDF files (*.pdf *.PDF)'
-
-        lastLayoutExportDir=QgsSettings().value('APP/lastLayoutExportDir')
-        if lastLayoutExportDir=="": lastUsedFolder = QDir(self.projectInstance.homePath())
-        else: lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
-
-        layoutList = []
-        selectedLayouts = self.listWidget.selectedItems()
-        if len(selectedLayouts)==0: #If nothing is selected, ask for destination folder and export all layouts
-            for x in range(self.listWidget.count()):
-                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-        elif len(selectedLayouts) == 1:  #If nonly one layout is selected, ask file name and export layout
-            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
-            layoutList.append(layout)
-            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as PDF', lastUsedFolder.filePath(layout.name() + default_extension), extension_filter,default_filter)
-            if fname[0] == '': fname = None
-        else: #Multiple selection, ask for destination folder and export selected layouts
-            for layout in selectedLayouts:
-                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-
-        if fname:
-            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
-            for layout in layoutList:
-                export = QgsLayoutExporter(layout)
-                if len(selectedLayouts) == 1: fileName = fname[0]
-                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
-                export.exportToPdf(fileName, QgsLayoutExporter.PdfExportSettings())
-                href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
-                self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
-
-    def exportLayoutImage(self):
-        """Export one or multiple layouts to image file"""
-        default_extension = '.png'
-        extension_filter = 'PNG format (*.png *.PNG);;BMP format (*.bmp *.BMP);;CUR format (*.cur *.CUR);;ICNS format (*.icns *.ICNS);;ICO format (*.ico *.ICO)' \
-                           'JPEG format (*.jpeg *.JPEG);;JPG format (*.jpg *.JPG);;PBM format (*.pbm *.PBM);;PGM format (*.pgm *.PGM);;PPM format (*.ppm *.PPM)' \
-                           'TIF format (*.tif *.TIF);;TIFF format (*.tiff *.TIFF);;WBMP format (*.wbmp *.WBMP);;WEBP format (*.webp *.WEBP);;WBM format (*.wbm *.XBM);;XPM format (*.xpm *.XPM)'
-        default_filter = 'PNG format (*.png *.PNG)'
-
-        lastLayoutExportDir=QgsSettings().value('APP/lastLayoutExportDir')
-        if lastLayoutExportDir=="": lastUsedFolder = QDir(self.projectInstance.homePath())
-        else: lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
-
-        layoutList = []
-        selectedLayouts = self.listWidget.selectedItems()
-        if len(selectedLayouts)==0: #If nothing is selected, ask for destination folder and export all layouts
-            for x in range(self.listWidget.count()):
-                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-        elif len(selectedLayouts) == 1:  #If nonly one layout is selected, ask file name and export layout
-            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
-            layoutList.append(layout)
-            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as image', lastUsedFolder.filePath(layout.name() + default_extension), extension_filter,default_filter)
-            if fname[0] == '': fname = None
-        else: #Multiple selection, ask for destination folder and export selected layouts
-            for layout in selectedLayouts:
-                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-
-        if fname:
-            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
-            for layout in layoutList:
-                export = QgsLayoutExporter(layout)
-                if len(selectedLayouts) == 1: fileName = fname[0]
-                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
-                export.exportToImage(fileName, QgsLayoutExporter.ImageExportSettings())
-                href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
-                self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
-
-    def exportLayoutSvg(self):
-        """Export one or multiple layouts to SVG file"""
-        default_extension = '.svg'
-        extension_filter = 'SVG format (*.svg *.SVG)'
-        default_filter = 'SVG format (*.svg *.SVG)'
-
-        lastLayoutExportDir=QgsSettings().value('APP/lastLayoutExportDir')
-        if lastLayoutExportDir=="": lastUsedFolder = QDir(self.projectInstance.homePath())
-        else: lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
-
-        layoutList = []
-        selectedLayouts = self.listWidget.selectedItems()
-        if len(selectedLayouts)==0: #If nothing is selected, ask for destination folder and export all layouts
-            for x in range(self.listWidget.count()):
-                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-        elif len(selectedLayouts) == 1:  #If nonly one layout is selected, ask file name and export layout
-            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
-            layoutList.append(layout)
-            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as SVG', lastUsedFolder.filePath(layout.name() + default_extension), extension_filter,default_filter)
-            if fname[0]=='': fname = None
-        else: #Multiple selection, ask for destination folder and export selected layouts
-            for layout in selectedLayouts:
-                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
-            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
-
-        if fname:
-            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
-            for layout in layoutList:
-                export = QgsLayoutExporter(layout)
-                if len(selectedLayouts) == 1: fileName = fname[0]
-                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
-                export.exportToSvg(fileName, QgsLayoutExporter.SvgExportSettings())
-                href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fileName).toString(),QDir.toNativeSeparators(fileName))
-                self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
-
-    def openLayoutEditor(self, item):
-        """Open the selected layout in editor"""
-        layout = self.projectLayoutManager.layoutByName(item.text())
         self.iface.openLayoutDesigner(layout)
 
     def createNewLayout(self):
@@ -362,18 +248,37 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return
             iterator = iterator + 1
 
+    def createLayoutFromTemplate(self, layout_template_path):
+        """Create a new layout based on a template file"""
+        document = QtXml.QDomDocument()
+        with open(layout_template_path) as file:
+            content = file.read()
+        document.setContent(content)
+        template_name = QFileInfo(layout_template_path).baseName()
+        iterator = 1
+        while True:
+            if self.projectLayoutManager.layoutByName(template_name + ' ' + str(iterator)) is None :
+                layout = QgsPrintLayout(self.projectInstance)
+                layout_name = template_name + ' ' + str(iterator)
+                layout.loadFromTemplate(document, QgsReadWriteContext())
+                layout.setName(layout_name)
+                self.projectLayoutManager.addLayout(layout)
+                return
+            iterator = iterator + 1
+
     def duplicateLayout(self):
         """Duplicate one or multiple selected layouts"""
-        selectedItems = self.listWidget.selectedItems()
-        listLayoutNames = []
-        for layoutItem in selectedItems: listLayoutNames.append(layoutItem.text())
-        for layoutName in listLayoutNames:
+        selected_items = self.listWidget.selectedItems()
+        list_layout_names = []
+        for layoutItem in selected_items:
+            list_layout_names.append(layoutItem.text())
+        for layoutName in list_layout_names:
             iterator = 1
             while True:
-                duplicateLayoutName = layoutName + ' copy ' + str(iterator)
-                if self.projectLayoutManager.layoutByName(duplicateLayoutName) is None :
+                duplicate_layout_name = layoutName + ' copy ' + str(iterator)
+                if self.projectLayoutManager.layoutByName(duplicate_layout_name) is None:
                     layout = self.projectLayoutManager.layoutByName(layoutName)
-                    self.projectLayoutManager.duplicateLayout(layout, duplicateLayoutName)
+                    self.projectLayoutManager.duplicateLayout(layout, duplicate_layout_name)
                     return
                 iterator = iterator + 1
 
@@ -390,45 +295,172 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 layout.setName(QListWidgetItem.text())
         else:
             if self.name_before_rename != QListWidgetItem.text():
-                self.iface.messageBar().pushWarning('Failed to rename layout',' Entered layout name already exists or is invalid.')
+                self.iface.messageBar().pushWarning('Failed to rename layout', ' Entered layout name already exists or is invalid.')
         self.updateLayoutWidgetList()
 
     def removeSelectedLayouts(self):
         """Remove one or multiple selected layouts"""
-        selectedLayouts = self.listWidget.selectedItems()
+        selected_items = self.listWidget.selectedItems()
         qm = QtWidgets.QMessageBox
-        if len(selectedLayouts) == 0: return
-        elif len(selectedLayouts)==1: ret = qm.question(self, 'Remove Selected Layout','Are you sure you want to remove permanently "{0}" ?'.format(selectedLayouts[0].text()),qm.Yes | qm.No)
-        else: ret = qm.question(self, 'Remove Selected Layouts', "Are you sure you want to remove permanently {0} layouts?".format(len(selectedLayouts)), qm.Yes | qm.No)
+        if len(selected_items) == 0:
+            return
+        elif len(selected_items) == 1:
+            ret = qm.question(self, 'Remove Selected Layout',
+                              f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.Yes | qm.No)
+        else:
+            ret = qm.question(self, 'Remove Selected Layouts',
+                              f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.Yes | qm.No)
         if ret == qm.Yes:
-            listLayoutNames=[]
-            for layout in selectedLayouts:
-                listLayoutNames.append(layout.text())
-            for layoutNames in listLayoutNames:
-                self.projectLayoutManager.removeLayout(self.projectLayoutManager.layoutByName(layoutNames))
+            layout_names = []
+            for item in selected_items:
+                layout_names.append(item.text())
+            for layout_name in layout_names:
+                self.projectLayoutManager.removeLayout(self.projectLayoutManager.layoutByName(layout_name))
 
     def saveAsTemplate(self):
         """Save selected layout as template"""
-        projectTemplateDir=QgsApplication.qgisSettingsDirPath()
-        lastUsedFolder = QDir(projectTemplateDir)
-        lastUsedFolder.cd('composer_templates')
-        selectedLayouts = self.listWidget.selectedItems()
-        layout = self.projectLayoutManager.layoutByName(selectedLayouts[0].text())
-        fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as template',lastUsedFolder.filePath(layout.name() + '.qpt'),'Layout templates (*.qpt *.QPT)')
-        if fname[0] != '':
-            template=layout.saveAsTemplate(fname[0], QgsReadWriteContext())
+        selected_items = self.listWidget.selectedItems()
+        current_layout = self.projectLayoutManager.layoutByName(selected_items[0].text())
+        file_path = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as template',
+                                                      self.template_dir.filePath(current_layout.name() + '.qpt'),
+                                                      'Layout templates (*.qpt *.QPT)')[0]
+        if file_path != '':
+            template=current_layout.saveAsTemplate(file_path, QgsReadWriteContext())
             if template:
-                href = '''<a href="{0}">{1}</a>'''.format(QUrl.fromLocalFile(fname[0]).toString(),QDir.toNativeSeparators(fname[0]))
-                self.iface.messageBar().pushSuccess('Ave as Template', ' Successfully saved layout template to ' + href)
+                href = f'<a href="{QUrl.fromLocalFile(file_path).toString()}">{QDir.toNativeSeparators(file_path)}</a>'
+                self.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
 
+    def exportLayoutPDF(self):
+        """Export one or multiple layouts to PDF file"""
+        default_extension = '.pdf'
+        extension_filter = 'PDF files (*.pdf *.PDF)'
+        default_filter = 'PDF files (*.pdf *.PDF)'
+
+        lastLayoutExportDir = QgsSettings().value('APP/lastLayoutExportDir')
+        if lastLayoutExportDir == "":
+            lastUsedFolder = QDir(self.projectInstance.homePath())
+        else:
+            lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
+
+        layoutList = []
+        selectedLayouts = self.listWidget.selectedItems()
+        if len(selectedLayouts) == 0: # If nothing is selected, ask for destination folder and export all layouts
+            for x in range(self.listWidget.count()):
+                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+        elif len(selectedLayouts) == 1:  # If nonly one layout is selected, ask file name and export layout
+            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
+            layoutList.append(layout)
+            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as PDF',
+                                                          lastUsedFolder.filePath(layout.name() + default_extension), extension_filter,default_filter)
+            if fname[0] == '': fname = None
+        else: # Multiple selection, ask for destination folder and export selected layouts
+            for layout in selectedLayouts:
+                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+
+        if fname:
+            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
+            for layout in layoutList:
+                export = QgsLayoutExporter(layout)
+                if len(selectedLayouts) == 1: fileName = fname[0]
+                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
+                export.exportToPdf(fileName, QgsLayoutExporter.PdfExportSettings())
+                href = f'<a href="{QUrl.fromLocalFile(fileName).toString()}">{QDir.toNativeSeparators(fileName)}</a>'
+                self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
+
+    def exportLayoutImage(self):
+        """Export one or multiple layouts to image file"""
+        default_extension = '.png'
+        extension_filter = 'PNG format (*.png *.PNG);;BMP format (*.bmp *.BMP);;CUR format (*.cur *.CUR);;ICNS format (*.icns *.ICNS);;ICO format (*.ico *.ICO)' \
+                           'JPEG format (*.jpeg *.JPEG);;JPG format (*.jpg *.JPG);;PBM format (*.pbm *.PBM);;PGM format (*.pgm *.PGM);;PPM format (*.ppm *.PPM)' \
+                           'TIF format (*.tif *.TIF);;TIFF format (*.tiff *.TIFF);;WBMP format (*.wbmp *.WBMP);;WEBP format (*.webp *.WEBP);;WBM format (*.wbm *.XBM);;XPM format (*.xpm *.XPM)'
+        default_filter = 'PNG format (*.png *.PNG)'
+
+        lastLayoutExportDir = QgsSettings().value('APP/lastLayoutExportDir')
+        if lastLayoutExportDir == "":
+            lastUsedFolder = QDir(self.projectInstance.homePath())
+        else:
+            lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
+
+        layoutList = []
+        selectedLayouts = self.listWidget.selectedItems()
+        if len(selectedLayouts) == 0: # If nothing is selected, ask for destination folder and export all layouts
+            for x in range(self.listWidget.count()):
+                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+        elif len(selectedLayouts) == 1:  # If nonly one layout is selected, ask file name and export layout
+            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
+            layoutList.append(layout)
+            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as image',
+                                                          lastUsedFolder.filePath(layout.name() + default_extension), extension_filter,default_filter)
+            if fname[0] == '': fname = None
+        else: # Multiple selection, ask for destination folder and export selected layouts
+            for layout in selectedLayouts:
+                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+
+        if fname:
+            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
+            for layout in layoutList:
+                export = QgsLayoutExporter(layout)
+                if len(selectedLayouts) == 1: fileName = fname[0]
+                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
+                export.exportToImage(fileName, QgsLayoutExporter.ImageExportSettings())
+                href = f'<a href="{QUrl.fromLocalFile(fileName).toString()}">{QDir.toNativeSeparators(fileName)}</a>'
+                self.iface.messageBar().pushSuccess('Export layout', ' Successfully exported layout to ' + href)
+
+    def exportLayoutSvg(self):
+        """Export one or multiple layouts to SVG file"""
+        default_extension = '.svg'
+        extension_filter = 'SVG format (*.svg *.SVG)'
+        default_filter = 'SVG format (*.svg *.SVG)'
+
+        lastLayoutExportDir=QgsSettings().value('APP/lastLayoutExportDir')
+        if lastLayoutExportDir=="":
+            lastUsedFolder = QDir(self.projectInstance.homePath())
+        else:
+            lastUsedFolder = QFileInfo(lastLayoutExportDir).dir()
+
+        layoutList = []
+        selectedLayouts = self.listWidget.selectedItems()
+        if len(selectedLayouts) == 0: # If nothing is selected, ask for destination folder and export all layouts
+            for x in range(self.listWidget.count()):
+                layoutList.append(self.projectLayoutManager.layoutByName(self.listWidget.item(x).text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+        elif len(selectedLayouts) == 1:  # If only one layout is selected, ask file name and export layout
+            layout = (self.projectLayoutManager.layoutByName(selectedLayouts[0].text()))
+            layoutList.append(layout)
+            fname = QtWidgets.QFileDialog.getSaveFileName(self, 'Choose a file name to save the layout as SVG',
+                                                          lastUsedFolder.filePath(layout.name() + default_extension), extension_filter, default_filter)
+            if fname[0] == '': fname = None
+        else: # Multiple selection, ask for destination folder and export selected layouts
+            for layout in selectedLayouts:
+                layoutList.append(self.projectLayoutManager.layoutByName(layout.text()))
+            fname = QtWidgets.QFileDialog.getExistingDirectory(self, 'Choose folder to save multiple files',
+                                                               lastUsedFolder.path(),QtWidgets.QFileDialog.ShowDirsOnly)
+
+        if fname:
+            QgsSettings().setValue('APP/lastLayoutExportDir', fname[0])
+            for layout in layoutList:
+                export = QgsLayoutExporter(layout)
+                if len(selectedLayouts) == 1: fileName = fname[0]
+                else: fileName = QDir(fname).filePath(layout.name() + default_extension)
+                export.exportToSvg(fileName, QgsLayoutExporter.SvgExportSettings())
+                href = f'<a href="{QUrl.fromLocalFile(fileName).toString()}">{QDir.toNativeSeparators(fileName)}</a>'
+                self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
 
 #TODO: change plugin icon
-#TODO: review code
+#TODO: cleanup the code
 #TODO: Export as background task
 #TODO: update statusbar
 #TODO: translation TR
-#TODO: open github repo
 #TODO: Separate code logic from gui?
 #TODO: Filter tool button? filter by size, page count, expression, etc.
 #TODO: Add support for reports
