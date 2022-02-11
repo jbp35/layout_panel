@@ -457,7 +457,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
 
-#TODO: change plugin icon
 #TODO: cleanup the code
 #TODO: Export as background task
 #TODO: update statusbar
