@@ -11,10 +11,10 @@
 	.st5{fill:#7A97CD;fill-opacity:0.44;}
 	
 		.st6{fill-rule:evenodd;clip-rule:evenodd;fill:url(#SVGID_1_);stroke:#3C3C3B;stroke-width:0.795;stroke-linecap:round;stroke-linejoin:round;}
-	.st7{opacity:0.231;fill:url(#SVGID_00000143613363680794736480000007095314933514152629_);enable-background:new    ;}
+	.st7{opacity:0.231;fill:url(#SVGID_00000137841519937879903180000008449207058378745531_);enable-background:new    ;}
 	.st8{fill-rule:evenodd;clip-rule:evenodd;fill:#F1F3F2;}
 	
-		.st9{fill:url(#SVGID_00000018935830750659571260000011620842913810582458_);stroke:#3C3C3B;stroke-width:0.6713;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.0972;}
+		.st9{fill:url(#SVGID_00000078043194079095006970000000785360361562194314_);stroke:#3C3C3B;stroke-width:0.6713;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.0972;}
 	.st10{fill:#FFFFFF;fill-opacity:0.578;stroke:#3C3C3B;stroke-width:0.994;}
 	.st11{fill-rule:evenodd;clip-rule:evenodd;fill:#CCCCCC;stroke:#737374;stroke-linejoin:round;}
 	.st12{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
@@ -48,24 +48,10 @@
 	<circle class="st2" cx="12" cy="12" r="6"/>
 </g>
 <g id="Layer_2">
-	<g>
-		<g>
-			<path class="st12" d="M2.48,19.5h21V5.66l-5-5.16h-16V19.5z"/>
-			<path class="st13" d="M23.48,20h-21c-0.28,0-0.5-0.22-0.5-0.5v-19C1.98,0.22,2.2,0,2.48,0h16c0.14,0,0.26,0.05,0.36,0.15l5,5.16
-				c0.09,0.09,0.14,0.22,0.14,0.35V19.5C23.98,19.78,23.76,20,23.48,20z M2.98,19h20V5.87L18.27,1H2.98V19z"/>
-		</g>
-		<path class="st14" d="M4.98,2h13v1h-13V2z"/>
-		<path class="st15" d="M3.98,17h18v1h-18V17z"/>
-		<path class="st4" d="M23.48,5.66h-5V0.5L23.48,5.66z"/>
-		<path class="st16" d="M4.48,2.5v18.99H8.5V7.55l4.96,0.04V2.54L8.5,2.5L4.48,2.5z"/>
-		<path class="st17" d="M5,2.57l4.02,4.5L8.08,7.92L4.16,3.54L5,2.57z"/>
-		<rect x="3.98" y="7" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="9" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="11" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="13" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="15" class="st18" width="3" height="1"/>
-		<path class="st14" d="M21.98,17V6.17h-1V17H21.98z"/>
-		<path class="st18" d="M4.01,17h3v1h-3L4.01,17z"/>
-	</g>
+	<polyline class="st3" points="17.13,8.1 23.5,8.1 23.5,15.91 17.13,15.91 	"/>
+	<polyline class="st3" points="14.63,15.91 0.5,15.91 0.5,8.1 14.64,8.1 	"/>
+	<line class="st27" x1="15.86" y1="6" x2="15.86" y2="18"/>
+	<line class="st27" x1="18.92" y1="5.66" x2="12.8" y2="5.66"/>
+	<line class="st27" x1="18.92" y1="18.34" x2="12.8" y2="18.34"/>
 </g>
 </svg>

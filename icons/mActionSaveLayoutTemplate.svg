@@ -11,10 +11,10 @@
 	.st5{fill:#7A97CD;fill-opacity:0.44;}
 	
 		.st6{fill-rule:evenodd;clip-rule:evenodd;fill:url(#SVGID_1_);stroke:#3C3C3B;stroke-width:0.795;stroke-linecap:round;stroke-linejoin:round;}
-	.st7{opacity:0.231;fill:url(#SVGID_00000143613363680794736480000007095314933514152629_);enable-background:new    ;}
+	.st7{opacity:0.231;fill:url(#SVGID_00000173862225087775499670000006653090536488388241_);enable-background:new    ;}
 	.st8{fill-rule:evenodd;clip-rule:evenodd;fill:#F1F3F2;}
 	
-		.st9{fill:url(#SVGID_00000018935830750659571260000011620842913810582458_);stroke:#3C3C3B;stroke-width:0.6713;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.0972;}
+		.st9{fill:url(#SVGID_00000044162088291639909220000016064912608769914508_);stroke:#3C3C3B;stroke-width:0.6713;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.0972;}
 	.st10{fill:#FFFFFF;fill-opacity:0.578;stroke:#3C3C3B;stroke-width:0.994;}
 	.st11{fill-rule:evenodd;clip-rule:evenodd;fill:#CCCCCC;stroke:#737374;stroke-linejoin:round;}
 	.st12{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
@@ -48,24 +48,18 @@
 	<circle class="st2" cx="12" cy="12" r="6"/>
 </g>
 <g id="Layer_2">
+	<path class="st11" d="M0.51,21.5h21V7.66l-5-5.16h-16V21.5z"/>
+	<path class="st3" d="M3.51,18.5h20V5.39L18.75,0.5H3.51V18.5z"/>
+	<polygon class="st5" points="21.01,16 21.01,17 5.01,17 5.01,3 5,3 5,2 18,2 18,3 6.01,3 6.01,16 	"/>
+	<path class="st4" d="M23.5,5.5h-5v-5L23.5,5.5z"/>
+	<path class="st5" d="M21,6v7h1V6H21z"/>
 	<g>
-		<g>
-			<path class="st12" d="M2.48,19.5h21V5.66l-5-5.16h-16V19.5z"/>
-			<path class="st13" d="M23.48,20h-21c-0.28,0-0.5-0.22-0.5-0.5v-19C1.98,0.22,2.2,0,2.48,0h16c0.14,0,0.26,0.05,0.36,0.15l5,5.16
-				c0.09,0.09,0.14,0.22,0.14,0.35V19.5C23.98,19.78,23.76,20,23.48,20z M2.98,19h20V5.87L18.27,1H2.98V19z"/>
-		</g>
-		<path class="st14" d="M4.98,2h13v1h-13V2z"/>
-		<path class="st15" d="M3.98,17h18v1h-18V17z"/>
-		<path class="st4" d="M23.48,5.66h-5V0.5L23.48,5.66z"/>
-		<path class="st16" d="M4.48,2.5v18.99H8.5V7.55l4.96,0.04V2.54L8.5,2.5L4.48,2.5z"/>
-		<path class="st17" d="M5,2.57l4.02,4.5L8.08,7.92L4.16,3.54L5,2.57z"/>
-		<rect x="3.98" y="7" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="9" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="11" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="13" class="st18" width="3" height="1"/>
-		<rect x="3.98" y="15" class="st18" width="3" height="1"/>
-		<path class="st14" d="M21.98,17V6.17h-1V17H21.98z"/>
-		<path class="st18" d="M4.01,17h3v1h-3L4.01,17z"/>
+		<path class="st24" d="M15.21,13h6.58c1.22,0,2.21,0.99,2.21,2.21v6.58c0,1.22-0.99,2.21-2.21,2.21h-6.58
+			c-1.22,0-2.21-0.99-2.21-2.21v-6.58C13,13.99,13.99,13,15.21,13z"/>
+		<path class="st25" d="M14.1,18.5h8.8c0,0,0,0,0-2.2s-0.55-2.2-4.4-2.2s-4.4,0-4.4,2.2V18.5z"/>
 	</g>
+	<path class="st12" d="M20.62,19.06l-2.61,2.11L18,19.78l-3.45,0.04l-0.01-1.39l3.45-0.04L17.97,17
+		C17.97,17,20.62,19.06,20.62,19.06z"/>
+	<path class="st26" d="M22.44,15.34l-0.01,7.49l-2.23,0l0-1.61l0.95,0l0.01-4.28l-0.95,0l0-1.61L22.44,15.34z"/>
 </g>
 </svg>

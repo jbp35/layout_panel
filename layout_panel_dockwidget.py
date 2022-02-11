@@ -131,7 +131,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         actions = []
         for layoutTemplatePath in layoutTemplateList:
             layoutTemplateAction = QtWidgets.QAction(QFileInfo(layoutTemplatePath).baseName(), self)
-            layoutTemplateAction.setIcon(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"))
+            layoutTemplateAction.setIcon(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayoutFromTemplate.svg"))
             layoutTemplateAction.setData(["layoutTemplateAction",layoutTemplatePath])
             actions.append(layoutTemplateAction)
         menu.addActions(actions)
@@ -178,11 +178,11 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         elif len(selectedLayouts) == 1: # Context menu if only one layout is selected
             menu = QtWidgets.QMenu()
             openAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconLayout.svg"), "Open Layout")
-            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"), "Remove Layout...")
-            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDuplicateLayout.svg"), "Duplicate Layout")
-            renameAction = menu.addAction(QtGui.QIcon(""),"Rename Layout")
+            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), "Duplicate Layout")
+            renameAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionRename.svg"),"Rename Layout")
+            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"),"Remove Layout...")
             menu.addSeparator()
-            saveAsTemplateAction = menu.addAction(QtGui.QIcon(""), "Save as Template...")
+            saveAsTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveLayoutTemplate.svg"), "Save Layout as Template...")
             menu.addSeparator()
             exportMenu=menu.addMenu("Export Layout as...")
             exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
@@ -210,8 +210,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         else: # Context menu if multiple layouts are selected
             menu = QtWidgets.QMenu()
+            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"),"Duplicate Layouts")
             removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"), "Remove Layouts...")
-            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDuplicateLayout.svg"), "Duplicate Layouts")
             menu.addSeparator()
             exportMenu = menu.addMenu("Export Layouts as...")
             exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
