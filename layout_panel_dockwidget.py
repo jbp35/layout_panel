@@ -456,13 +456,16 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 href = f'<a href="{QUrl.fromLocalFile(fileName).toString()}">{QDir.toNativeSeparators(fileName)}</a>'
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
-
+                
+#TODO: error when using F2 shortcut
+#TODO: keyboard shortcut to remove layout
 #TODO: cleanup the code
 #TODO: Export as background task
 #TODO: update statusbar
 #TODO: translation TR
 #TODO: Separate code logic from gui?
 #TODO: Filter tool button? filter by size, page count, expression, etc.
+#TODO: add sortable columns, like page size, number of pages, date created/modified, etc.
 #TODO: Add support for reports
 #TODO: Support for drag & drop
 #TODO: quick print layout?
