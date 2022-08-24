@@ -209,9 +209,7 @@ class LayoutPanel:
 
             if self.dockwidget == None:
                 self.dockwidget = LayoutPanelDockWidget(self.iface)
-
+         
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
-            
-            #TODO: Remember size of the widget at startup

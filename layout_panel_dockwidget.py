@@ -47,12 +47,12 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # Used to store the initial name of the layout before entering editor mode
         self.name_before_rename = None
-        
+
         #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
         self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.pbCreateLayout.clicked.connect(self.createNewLayout)
-        self.pbDeleteLayout.clicked.connect(self.removeSelectedLayouts)
+        self.pbDeleteLayout.clicked.connect(lambda: self.removeSelectedLayouts(True))
         self.listWidget.itemDoubleClicked.connect(self.openCurrentLayout)
         self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.openContextMenu)
@@ -80,20 +80,32 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     #Helper to log msg in QGIS used for debug only
     def log(self, msg):
         QgsMessageLog.logMessage(str(msg), "Layout Panel")
-        
-            
+    
+          
     def keyPressEvent(self, event):
          if (event.type() == QEvent.KeyPress):
             key = event.key()
+            modifier = event.modifiers()
 
             if key == Qt.Key_F2:
                 self.renameLayout()
                 event.accept()
                 
-            if key == Qt.Key_Delete:
+            if ( modifier != Qt.ShiftModifier) and key == Qt.Key_Delete:
                 self.removeSelectedLayouts()
                 event.accept()
-
+                
+            if ( modifier == Qt.ShiftModifier) and key == Qt.Key_Delete:
+                self.removeSelectedLayouts(False)
+                event.accept()
+                
+            if ( modifier == Qt.ControlModifier) and key == Qt.Key_C:
+                self.duplicateLayout()
+                event.accept()
+                
+            
+   
+   
     def closeEvent(self, event):
         """Close the plugin"""
         self.closingPlugin.emit()
@@ -321,24 +333,28 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self.iface.messageBar().pushWarning('Failed to rename layout', ' Entered layout name already exists or is invalid.')
         self.updateLayoutWidgetList()
 
-    def removeSelectedLayouts(self):
+    def removeSelectedLayouts(self, askConfirmation=True):
         """Remove one or multiple selected layouts"""
         selected_items = self.listWidget.selectedItems()
-        qm = QtWidgets.QMessageBox
-        if len(selected_items) == 0:
-            return
-        elif len(selected_items) == 1:
-            ret = qm.question(self, 'Remove Selected Layout',
-                              f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.Yes | qm.No)
-        else:
-            ret = qm.question(self, 'Remove Selected Layouts',
-                              f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.Yes | qm.No)
-        if ret == qm.Yes:
-            layout_names = []
-            for item in selected_items:
-                layout_names.append(item.text())
-            for layout_name in layout_names:
-                self.project_layout_manager.removeLayout(self.project_layout_manager.layoutByName(layout_name))
+        if askConfirmation:
+            qm = QtWidgets.QMessageBox
+            if len(selected_items) == 0:
+                return
+            elif len(selected_items) == 1:
+                ret = qm.question(self, 'Remove Selected Layout',
+                                f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.Yes | qm.No)
+            else:
+                ret = qm.question(self, 'Remove Selected Layouts',
+                                f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.Yes | qm.No)
+        
+            if ret == qm.No:
+                return
+            
+        layout_names = []
+        for item in selected_items:
+            layout_names.append(item.text())
+        for layout_name in layout_names:
+            self.project_layout_manager.removeLayout(self.project_layout_manager.layoutByName(layout_name))
 
     def saveAsTemplate(self):
         """Save selected layout as template"""
@@ -479,8 +495,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
 
                 
-#TODO: error when using F2 shortcut
-#TODO: keyboard shortcut to remove layout
 #TODO: cleanup the code
 #TODO: Export as background task
 #TODO: update statusbar
