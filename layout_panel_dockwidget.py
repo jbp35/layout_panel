@@ -89,6 +89,10 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if key == Qt.Key_F2:
                 self.renameLayout()
                 event.accept()
+                
+            if key == Qt.Key_Delete:
+                self.removeSelectedLayouts()
+                event.accept()
 
     def closeEvent(self, event):
         """Close the plugin"""
