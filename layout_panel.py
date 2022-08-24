@@ -205,6 +205,7 @@ class LayoutPanel:
 
         if not self.pluginIsActive:
             self.pluginIsActive = True
+            QSettings().setValue('plugins/layoutpanel/pluginIsActive', True)
 
             if self.dockwidget == None:
                 self.dockwidget = LayoutPanelDockWidget(self.iface)
