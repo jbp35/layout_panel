@@ -26,8 +26,9 @@ import os
 import re
 
 from qgis.PyQt import QtGui, QtWidgets, uic, QtXml
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QUrl, QDir, QFileInfo, QFileSystemWatcher
-from qgis.core import QgsProject, QgsPrintLayout, QgsLayoutExporter, QgsSettings, QgsReadWriteContext, QgsApplication, QgsUnitTypes
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QUrl, QDir, QFileInfo, QFileSystemWatcher, QEvent
+from PyQt5.QtWidgets import QAbstractItemView 
+from qgis.core import QgsProject, QgsPrintLayout, QgsLayoutExporter, QgsSettings, QgsReadWriteContext, QgsApplication, QgsUnitTypes, QgsMessageLog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'layout_panel_dockwidget_base.ui'))
@@ -46,6 +47,9 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # Used to store the initial name of the layout before entering editor mode
         self.name_before_rename = None
+        
+        #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
+        self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.pbCreateLayout.clicked.connect(self.createNewLayout)
         self.pbDeleteLayout.clicked.connect(self.removeSelectedLayouts)
@@ -71,6 +75,20 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.updateProjectInstance()
         self.updateLayoutWidgetList()
         self.updateTemplateMenu()
+    
+    
+    #Helper to log msg in QGIS used for debug only
+    def log(self, msg):
+        QgsMessageLog.logMessage(str(msg), "Layout Panel")
+        
+            
+    def keyPressEvent(self, event):
+         if (event.type() == QEvent.KeyPress):
+            key = event.key()
+
+            if key == Qt.Key_F2:
+                self.renameLayout()
+                event.accept()
 
     def closeEvent(self, event):
         """Close the plugin"""
