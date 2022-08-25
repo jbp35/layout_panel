@@ -26,9 +26,10 @@ import os
 import re
 
 from qgis.PyQt import QtGui, QtWidgets, uic, QtXml
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QUrl, QDir, QFileInfo, QFileSystemWatcher, QEvent
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QUrl, QDir, QFileInfo, QFileSystemWatcher, QEvent, QSettings
 from PyQt5.QtWidgets import QAbstractItemView 
 from qgis.core import QgsProject, QgsPrintLayout, QgsLayoutExporter, QgsSettings, QgsReadWriteContext, QgsApplication, QgsUnitTypes, QgsMessageLog
+from PyQt5.QtGui import QFontDatabase, QFont, QRawFont
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'layout_panel_dockwidget_base.ui'))
@@ -44,7 +45,10 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.setupUi(self)
 
         self.iface = iface
-
+        
+        # Install required fonts for default layout templates
+        self.installFont()
+        
         # Used to store the initial name of the layout before entering editor mode
         self.name_before_rename = None
 
@@ -75,13 +79,39 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.updateProjectInstance()
         self.updateLayoutWidgetList()
         self.updateTemplateMenu()
-    
+        
+        #TODO : update automatically
+        self.updateTemplateMenu()
+
     
     #Helper to log msg in QGIS used for debug only
     def log(self, msg):
         QgsMessageLog.logMessage(str(msg), "Layout Panel")
     
-          
+        
+    #Install fonts required for layout templates    
+    def installFont(self):
+        typeface_list = ["Roboto","Open_Sans"]
+        installed_fonts = QFontDatabase().families()
+        font_list = []  
+        
+        #List all the fonts of each family
+        for typeface_name in typeface_list:
+            typeface_dir=os.path.dirname(os.path.realpath(__file__)) + '/fonts/' + typeface_name
+            dir = QDir(typeface_dir)
+            dir.setFilter(QDir.Files)
+            dir.setNameFilters(["*.ttf"])
+            for font in dir.entryList():
+                font_list.append(dir.filePath(font))
+
+        # Install all the fonts if they are not already installed
+        for font in font_list:  
+            raw_name = QRawFont(font, 12, 0).familyName()
+            if raw_name not in installed_fonts:
+                QFontDatabase.addApplicationFont(font)
+    
+        
+    # Manage keyboard shortcuts       
     def keyPressEvent(self, event):
          if (event.type() == QEvent.KeyPress):
             key = event.key()
@@ -89,6 +119,10 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
             if key == Qt.Key_F2:
                 self.renameLayout()
+                event.accept()
+                
+            if (key == Qt.Key_Enter) or (key == Qt.Key_Return):
+                self.openCurrentLayout()
                 event.accept()
                 
             if ( modifier != Qt.ShiftModifier) and key == Qt.Key_Delete:
@@ -103,8 +137,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self.duplicateLayout()
                 event.accept()
                 
-            
-   
    
     def closeEvent(self, event):
         """Close the plugin"""
@@ -125,6 +157,13 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.listWidget.clear()
         search_value = self.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(")\
             .replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
+
+        #Disable delete button if there are no layouts in the list
+        if len(layout_list) == 0:
+            self.pbDeleteLayout.setEnabled(False)
+        else:
+            self.pbDeleteLayout.setEnabled(True)
+        
         for layout in layout_list:
             # necessary to ensure that tooltips are updated when layout format or page count changes
             layout.pageCollection().changed.connect(self.updateLayoutWidgetList)
@@ -147,16 +186,25 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text}')
                 self.listWidget.addItem(item)
 
+
     def updateTemplateMenu(self):
         """Generate the template menu"""
-        projectTemplateDir = QDir(QgsApplication.qgisSettingsDirPath())
-        projectTemplateDir.cd('composer_templates')
-        projectTemplateDir.setFilter(QDir.Files)
-        projectTemplateDir.setNameFilters(["*.qpt", "*.QPT"])
-        projectTemplateDir.setSorting(QDir.Time)
+        
+        searchPathsForTemplates=QSettings().value("core/Layout/searchPathsForTemplates")
+        searchPathsForTemplates.append(QgsApplication.qgisSettingsDirPath()+'composer_templates')
+        searchPathsForTemplates.append(os.path.dirname(os.path.realpath(__file__)) + '/templates')
+
         layoutTemplateList = []
-        for template in projectTemplateDir.entryList():
-            layoutTemplateList.append(projectTemplateDir.filePath(template))
+        
+        for path in searchPathsForTemplates:
+            self.log(path) 
+            projectTemplateDir = QDir(path)
+            projectTemplateDir.setFilter(QDir.Files)
+            projectTemplateDir.setNameFilters(["*.qpt", "*.QPT"])
+            projectTemplateDir.setSorting(QDir.Time)
+            
+            for template in projectTemplateDir.entryList():
+                layoutTemplateList.append(projectTemplateDir.filePath(template))
 
         menu = QtWidgets.QMenu()
         if not layoutTemplateList:
@@ -298,6 +346,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 layout.loadFromTemplate(document, QgsReadWriteContext())
                 layout.setName(layout_name)
                 self.project_layout_manager.addLayout(layout)
+                self.iface.openLayoutDesigner(layout)
                 return
             iterator = iterator + 1
 
@@ -499,7 +548,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 #TODO: Export as background task
 #TODO: update statusbar
 #TODO: translation TR
-#TODO: Separate code logic from gui?
 #TODO: Filter tool button? filter by size, page count, expression, etc.
 #TODO: add sortable columns, like page size, number of pages, date created/modified, etc.
 #TODO: Add support for reports
