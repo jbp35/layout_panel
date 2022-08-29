@@ -71,7 +71,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.layout_item.renameLayoutClosedEditor)
-        self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutWidgetList)
+        self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutList)
 
     
     # Manage keyboard shortcuts       

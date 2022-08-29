@@ -22,11 +22,11 @@ class ContextMenu():
             if action == newLayoutAction:
                 self.parent.layout_item.createNewLayout()
             elif action == exportPDFAction:
-                self.parent.layout_item.exportLayoutPDF()
+                self.parent.layout_item.exportLayout("PDF")
             elif action == exportImageAction:
-                self.parent.layout_item.exportLayoutImage()
+                self.parent.layout_item.exportLayout("IMG")
             elif action == exportSvgAction:
-                self.parent.layout_item.exportLayoutSvg()
+                self.parent.layout_item.exportLayout("SVG")
 
         elif len(selectedLayouts) == 1: # Context menu if only one layout is selected
             menu = QtWidgets.QMenu()
@@ -53,11 +53,11 @@ class ContextMenu():
             elif action == saveAsTemplateAction:
                 self.parent.layout_item.saveAsTemplate()
             elif action == exportPDFAction:
-                self.parent.layout_item.exportLayoutPDF()
+                self.parent.layout_item.exportLayout("PDF")
             elif action == exportImageAction:
-                self.parent.layout_item.exportLayoutImage()
+                self.parent.layout_item.exportLayout("IMG")
             elif action == exportSvgAction:
-                self.parent.layout_item.exportLayoutSvg()
+                self.parent.layout_item.exportLayout("SVG")
             else:
                 print("Code not found")
 
@@ -76,10 +76,10 @@ class ContextMenu():
             elif action == duplicateAction:
                 self.parent.layout_item.duplicateLayout()
             elif action == exportPDFAction:
-                self.parent.layout_item.exportLayoutPDF()
+                self.parent.layout_item.exportLayout("PDF")
             elif action == exportImageAction:
-                self.parent.layout_item.exportLayoutImage()
+                self.parent.layout_item.exportLayout("IMG")
             elif action == exportSvgAction:
-                self.parent.layout_item.exportLayoutSvg()
+                self.parent.layout_item.exportLayout("SVG")
             else:
                 return

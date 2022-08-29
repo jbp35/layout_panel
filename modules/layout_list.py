@@ -10,23 +10,24 @@ class LayoutList():
         self.parent = parent
         self.layout_list = None
         
-        QgsProject.instance().layoutManager().layoutAdded.connect(self.updateLayoutWidgetList)
-        QgsProject.instance().layoutManager().layoutRemoved.connect(self.updateLayoutWidgetList)
-        QgsProject.instance().layoutManager().layoutRenamed.connect(self.updateLayoutWidgetList)
+        QgsProject.instance().layoutManager().layoutAdded.connect(self.updateLayoutList)
+        QgsProject.instance().layoutManager().layoutRemoved.connect(self.updateLayoutList)
+        QgsProject.instance().layoutManager().layoutRenamed.connect(self.updateLayoutList)
         
-        self.updateLayoutWidgetList()
+        self.updateLayoutList()
+       
         
-    def updateLayoutWidgetList(self):
+    def updateLayoutList(self):
         """Generate the list of layouts"""
-        layout_manager= self.parent.project.getLayoutManager()
-        self.layout_list = layout_manager.layouts()
         self.parent.listWidget.clear()
+        layout_manager=self.parent.project.getLayoutManager()
+        self.layout_list = layout_manager.layouts()
         search_value = self.parent.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(")\
             .replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
         
         for layout in self.layout_list:
             # necessary to ensure that tooltips are updated when layout format or page count changes
-            layout.pageCollection().changed.connect(self.updateLayoutWidgetList)
+            layout.pageCollection().changed.connect(self.updateLayoutList)
             match = bool(re.search(search_value, layout.name(), re.IGNORECASE))
             if match:
                 layout = layout_manager.layoutByName(layout.name())
