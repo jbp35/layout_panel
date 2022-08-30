@@ -5,7 +5,6 @@ from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo,  QSettings
 from qgis.core import QgsApplication
 
 
-
 class TemplateMenu():
     def __init__(self,parent=None):
         """Initialize the template menu"""
@@ -63,7 +62,7 @@ class TemplateMenu():
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
             fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a template to create a new layout', layoutTemplateAction.data()[1], 'Layout templates (*.qpt *.QPT)')
             if fname[0] != '':
-                self.parent.layou_item.createLayoutFromTemplate(fname[0])
+                self.parent.project.createLayoutFromTemplate(fname[0])
         elif layoutTemplateAction.data()[0] == "layoutTemplateAction":
-            self.parent.layout_item.createLayoutFromTemplate(layoutTemplateAction.data()[1])
+            self.parent.project.createLayoutFromTemplate(layoutTemplateAction.data()[1])
 

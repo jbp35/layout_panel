@@ -52,5 +52,41 @@ class LayoutList():
             self.parent.pbDeleteLayout.setEnabled(False)
         else:
             self.parent.pbDeleteLayout.setEnabled(True)
+      
+            
+    def duplicateSelectedLayouts(self):
+        """Duplicate one or multiple selected layouts"""
+        selected_items = self.parent.listWidget.selectedItems()
+        
+        # Copy the list of selected items to avoid race condition due to refresh
+        list_layout_names = []  
+        for layout_item in selected_items:
+            list_layout_names.append(layout_item.text())
+        for layout_name in list_layout_names:
+            self.parent.layout_item.duplicateLayout(layout_name)
+
+
+    def removeSelectedLayouts(self, askConfirmation=True):
+        """Remove one or multiple selected layouts"""
+        selected_items = self.parent.listWidget.selectedItems()
+        if askConfirmation:
+            qm = QtWidgets.QMessageBox
+            if len(selected_items) == 0:
+                return
+            elif len(selected_items) == 1:
+                ret = qm.question(self.parent, 'Remove Selected Layout',
+                                f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.Yes | qm.No)
+            else:
+                ret = qm.question(self.parent, 'Remove Selected Layouts',
+                                f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.Yes | qm.No)
+        
+            if ret == qm.No:
+                return
+            
+        layout_names = []
+        for item in selected_items:
+            layout_names.append(item.text())
+        for layout_name in layout_names:
+            self.parent.layout_item.removeLayout(layout_name)
     
     

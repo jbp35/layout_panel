@@ -65,8 +65,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         # Set connections        
-        self.pbCreateLayout.clicked.connect(self.layout_item.createNewLayout)
-        self.pbDeleteLayout.clicked.connect(lambda: self.layout_item.removeSelectedLayouts(True))
+        self.pbCreateLayout.clicked.connect(self.project.createNewLayout)
+        self.pbDeleteLayout.clicked.connect(lambda: self.layout_list.removeSelectedLayouts(True))
         self.listWidget.itemDoubleClicked.connect(self.layout_item.openCurrentLayout)
         self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
@@ -89,11 +89,11 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 event.accept()
                 
             if ( modifier != Qt.ShiftModifier) and key == Qt.Key_Delete:
-                self.layout_item.removeSelectedLayouts()
+                self.layout_list.removeSelectedLayouts()
                 event.accept()
                 
             if ( modifier == Qt.ShiftModifier) and key == Qt.Key_Delete:
-                self.layout_item.removeSelectedLayouts(False)
+                self.layout_list.removeSelectedLayouts(False)
                 event.accept()
                 
             if ( modifier == Qt.ControlModifier) and key == Qt.Key_C:
