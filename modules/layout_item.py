@@ -73,14 +73,20 @@ class LayoutItem():
                 self.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
 
        
-    def exportLayout(self, layout, fname, format):
+    def exportLayout(self,task,layout, file_name, format):
         """Export the layout"""
         export = QgsLayoutExporter(layout)
         if format == "PDF":
-            export.exportToPdf(fname, QgsLayoutExporter.PdfExportSettings())
+            export.exportToPdf(file_name, QgsLayoutExporter.PdfExportSettings())
         elif format == "IMG":
-            export.exportToImage(fname, QgsLayoutExporter.ImageExportSettings())
+            export.exportToImage(file_name, QgsLayoutExporter.ImageExportSettings())
         elif format == "SVG":
-            export.exportToSvg(fname, QgsLayoutExporter.SvgExportSettings())     
-        href = f'<a href="{QUrl.fromLocalFile(fname).toString()}">{QDir.toNativeSeparators(fname)}</a>'
-        self.parent.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
+            export.exportToSvg(file_name, QgsLayoutExporter.SvgExportSettings())
+        return file_name
+    
+     
+    def exportLayoutCompleted(self,exception,result=None):
+        """Called when export background task is complete"""
+        if not exception:
+            href = f'<a href="{QUrl.fromLocalFile(result).toString()}">{QDir.toNativeSeparators(result)}</a>'
+            self.parent.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)

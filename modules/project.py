@@ -25,7 +25,7 @@ class Project():
         
         last_layout_export_dir = QgsSettings().value('APP/lastLayoutExportDir')
         if last_layout_export_dir == "":
-            self.last_used_folder = QDir(self.project_instance.homePath()).path()
+            self.last_used_folder = QDir(self.project_instance.homePath()).absolutePath()
         else:
             self.last_used_folder = QFileInfo(last_layout_export_dir).dir()
             

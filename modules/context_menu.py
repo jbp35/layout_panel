@@ -1,11 +1,13 @@
 from qgis.PyQt import QtGui, QtWidgets
 from qgis.PyQt.QtCore import  QDir
+from qgis.core import QgsTask,QgsApplication, QgsLayoutExporter
 
 
 class ContextMenu():
     def __init__(self,parent=None):
         """Initialize the context menu list"""
         self.parent = parent
+        self.task_list = []
         
     
     def openContextMenu(self, position):
@@ -58,6 +60,7 @@ class ContextMenu():
             exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"),"Export as SVG")
         
         action = menu.exec_(self.parent.listWidget.mapToGlobal(position))
+        if action == None: return
             
         if action == newLayoutAction:
             self.parent.project.createNewLayout()
@@ -133,8 +136,16 @@ class ContextMenu():
             if dir_name == '' : return 
             self.parent.project.setLastExportDir(dir_name)
         
-        # Export the layouts one by one       
+        # Export the layouts one by one in seperate qgs background tasks      
         for layout in layoutList:
             if len(selectedLayouts) != 1: 
-                file_name = QDir(dir_name).filePath(layout.name() + default_extension) 
-            self.parent.layout_item.exportLayout(layout,file_name, format)
+                file_name = QDir(dir_name).filePath(layout.name() + default_extension)
+            
+            #task must be stored permanently to avoid auto cleaning
+            self.task_list.append(QgsTask.fromFunction('Export layout: ' + layout.name(), 
+                                         self.parent.layout_item.exportLayout, 
+                                         on_finished=self.parent.layout_item.exportLayoutCompleted,
+                                         layout=layout,
+                                         file_name=file_name,
+                                         format=format))
+            QgsApplication.taskManager().addTask(self.task_list[-1])
