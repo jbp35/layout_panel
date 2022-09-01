@@ -93,6 +93,5 @@ class Project():
                 layout.loadFromTemplate(document, QgsReadWriteContext())
                 layout.setName(layout_name)
                 self.project_layout_manager.addLayout(layout)
-                self.parent.iface.openLayoutDesigner(layout)
                 return
             iterator = iterator + 1
