@@ -1,7 +1,8 @@
-from qgis.PyQt.QtCore import QDir, QFileInfo
-from qgis.core import QgsProject, QgsPrintLayout,QgsSettings,QgsReadWriteContext
-from qgis.PyQt import QtXml
+import os
 
+from qgis.PyQt.QtCore import QDir, QFileInfo,  QSettings
+from qgis.core import QgsApplication, QgsProject, QgsPrintLayout,QgsSettings,QgsReadWriteContext
+from qgis.PyQt import QtXml
 
 class Project():
     def __init__(self,parent=None):
@@ -27,7 +28,7 @@ class Project():
         if last_layout_export_dir == "":
             self.last_used_folder = QDir(self.project_instance.homePath()).absolutePath()
         else:
-            self.last_used_folder = QFileInfo(last_layout_export_dir).dir()
+            self.last_used_folder = QFileInfo(last_layout_export_dir).dir().absolutePath()
             
         
     def getLayoutManager(self):
@@ -41,7 +42,7 @@ class Project():
     
     
     def getLastUsedFolder(self):
-        """REturn last used folder"""
+        """Return last used folder"""
         return self.last_used_folder
     
     
@@ -52,6 +53,15 @@ class Project():
             path=QFileInfo(path).dir().absolutePath()
         QgsSettings().setValue('APP/lastLayoutExportDir', path)
         self.last_used_folder = path
+        
+    def getSearchPathsForTemplates(self):
+        """return a list a path to search for templates"""
+        
+        #TODO: first item in the list shoudl be default template folder
+        searchPathsForTemplates=QSettings().value("core/Layout/searchPathsForTemplates")
+        searchPathsForTemplates.append(QgsApplication.qgisSettingsDirPath()+'composer_templates')
+        searchPathsForTemplates.append(os.path.dirname(os.path.realpath(__file__)) + '/templates')
+        return searchPathsForTemplates
         
         
     def createNewLayout(self):

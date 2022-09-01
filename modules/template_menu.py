@@ -1,8 +1,6 @@
-import os
-
 from qgis.PyQt import QtGui, QtWidgets
-from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo,  QSettings
-from qgis.core import QgsApplication
+from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo
+
 
 
 class TemplateMenu():
@@ -23,46 +21,56 @@ class TemplateMenu():
         for action in self.template_menu.actions():
             self.template_menu.removeAction(action)
         
-        searchPathsForTemplates=QSettings().value("core/Layout/searchPathsForTemplates")
-        searchPathsForTemplates.append(QgsApplication.qgisSettingsDirPath()+'composer_templates')
-        searchPathsForTemplates.append(os.path.dirname(os.path.realpath(__file__)) + '/templates')
+        search_paths_for_templates=self.parent.project.getSearchPathsForTemplates()
+        layout_template_list = []
 
-        layoutTemplateList = []
-        
-        for path in searchPathsForTemplates:
-            projectTemplateDir = QDir(path)
-            projectTemplateDir.setFilter(QDir.Files)
-            projectTemplateDir.setNameFilters(["*.qpt", "*.QPT"])
-            projectTemplateDir.setSorting(QDir.Time)
+        # list template files in each directory
+        for path in search_paths_for_templates:
+            template_dir = QDir(path)
+            template_dir.setFilter(QDir.Files)
+            template_dir.setNameFilters(["*.qpt", "*.QPT"])
+            template_dir.setSorting(QDir.Time)
             
-            for template in projectTemplateDir.entryList():
-                layoutTemplateList.append(projectTemplateDir.filePath(template))
+            for template in template_dir.entryList():
+                layout_template_list.append(template_dir.filePath(template))
 
-        if not layoutTemplateList:
+        #if there is no templates to display show a message
+        if not layout_template_list:
             layoutTemplateAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), 'Template folder is empty')
             layoutTemplateAction.setEnabled(False)
-        actions = []
-        for layoutTemplatePath in layoutTemplateList:
-            layoutTemplateAction = QtWidgets.QAction(QFileInfo(layoutTemplatePath).baseName(), self.parent)
-            layoutTemplateAction.setIcon(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayoutFromTemplate.svg"))
-            layoutTemplateAction.setData(["layoutTemplateAction",layoutTemplatePath])
-            actions.append(layoutTemplateAction)
-        self.template_menu.addActions(actions)
+        
+        #add menu action for each template file found
+        actions_list = []
+        for layout_template_path in layout_template_list:
+            layout_template_action = QtWidgets.QAction(QFileInfo(layout_template_path).baseName(), self.parent)
+            layout_template_action.setIcon(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayoutFromTemplate.svg"))
+            layout_template_action.setData(["layoutTemplateAction", layout_template_path])
+            actions_list.append(layout_template_action)
+        self.template_menu.addActions(actions_list)
+        
+        
         self.template_menu.addSeparator()
         selectTemplateAction = self.template_menu.addAction("Choose Another Template File...")
-        selectTemplateAction.setData(["selectTemplateAction", projectTemplateDir.absolutePath()])
-        openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Template Folder")
-        openTemplateFolderAction.setData(["openTemplateFolderAction", projectTemplateDir.absolutePath()])
+        selectTemplateAction.setData(["selectTemplateAction"])
+        editTemplatePathsAction = self.template_menu.addAction("Edit search paths for layout templates")
+        editTemplatePathsAction.setData(["editTemplatePaths"])
+        openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Default Template Folder")
+        openTemplateFolderAction.setData(["openTemplateFolderAction", search_paths_for_templates[0]])
         
 
     def templateMenuTriggered(self, layoutTemplateAction):
         """Called when template menu is triggered"""
         if layoutTemplateAction.data()[0] == "openTemplateFolderAction":
             QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(layoutTemplateAction.data()[1]))
+        
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
-            fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a template to create a new layout', layoutTemplateAction.data()[1], 'Layout templates (*.qpt *.QPT)')
+            fname = QtWidgets.QFileDialog.getOpenFileName(self.parent, 'Choose a template to create a new layout', self.parent.project.getLastUsedFolder(), 'Layout templates (*.qpt *.QPT)')
             if fname[0] != '':
                 self.parent.project.createLayoutFromTemplate(fname[0])
+        
         elif layoutTemplateAction.data()[0] == "layoutTemplateAction":
             self.parent.project.createLayoutFromTemplate(layoutTemplateAction.data()[1])
+            
+        elif layoutTemplateAction.data()[0] == "editTemplatePaths":
+            self.parent.iface.showOptionsDialog(currentPage = "Layouts")
 
