@@ -33,18 +33,27 @@ class LayoutList():
                 layout = layout_manager.layoutByName(layout.name())
                 layout_page_collection = layout.pageCollection()
                 page_count = layout_page_collection.pageCount()
+                
+                #page size
                 if layout_page_collection.hasUniformPageSizes():
                     page_size = layout_page_collection.maximumPageSize()
                     units = QgsUnitTypes.encodeUnit(layout.units())
                     page_size_text = f'{page_size.width()}x{page_size.height()} {units}'
                 else:
                     page_size_text = 'variable'
+                
+                # map scale
+                reference_map=layout.referenceMap()
+                if reference_map:
+                    map_scale=f'1:{round(reference_map.scale())}'
+                else:
+                    map_scale="Unknown"
 
                 item = QtWidgets.QListWidgetItem()
                 item.setText(layout.name())
                 item.setIcon(QtGui.QIcon(':/plugins/layout_panel/icons/mIconLayout.svg'))
                 item.setFlags(item.flags() | Qt.ItemIsEditable)
-                item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text}')
+                item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text} <br> Map Scale: {map_scale}')
                 self.parent.listWidget.addItem(item)
         
         #Disable delete button if there are no layouts in the list
