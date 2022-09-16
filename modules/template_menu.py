@@ -52,11 +52,11 @@ class TemplateMenu():
         self.template_menu.addSeparator()
         selectTemplateAction = self.template_menu.addAction("Choose Another Template File...")
         selectTemplateAction.setData(["selectTemplateAction"])
+        openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Default Template Folder")
+        openTemplateFolderAction.setData(["openTemplateFolderAction"])
         #TODO: add settings icon
         editTemplatePathsAction = self.template_menu.addAction("Layout Templates Settings...")
         editTemplatePathsAction.setData(["editTemplatePaths"])
-        openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Default Template Folder")
-        openTemplateFolderAction.setData(["openTemplateFolderAction"])
         
 
     def templateMenuTriggered(self, layoutTemplateAction):

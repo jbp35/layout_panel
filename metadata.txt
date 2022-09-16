@@ -6,7 +6,7 @@
 name=Layout Panel
 qgisMinimumVersion=3.0
 description=Add a panel to manage layouts directly from QGIS main window
-version=0.2
+version=0.3
 author=Atelier JBP
 email=jbpeter@outlook.com
 
@@ -19,7 +19,17 @@ repository=https://github.com/jbp35/layout_panel
 
 hasProcessingProvider=no
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog=
+      0.3
+        * Reload the panel automatically at QGIS startup
+        * Copy first page of the layout directly to the clipboard
+        * Support keyboard shortcuts to delete and rename (F2)
+        * Export layouts using background tasks
+        * Use QGIS settings to manage search patch for layout templates
+        * Added map scale in tooltip
+        * Added changelog
+        * Refactored the code into modules
+
 
 # Tags are comma separated with spaces allowed
 tags=Layout, manager, panel, print, composition, batch, export, template

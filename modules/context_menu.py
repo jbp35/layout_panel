@@ -46,6 +46,7 @@ class ContextMenu():
             saveAsTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveLayoutTemplate.svg"), "Save Layout as Template...")
             menu.addSeparator()
             shareToMenu=menu.addMenu("Share to...")
+            #TODO: add clipboard icon
             copyToClipboardAction = shareToMenu.addAction( "Copy to clipboard")
             exportMenu=menu.addMenu("Export Layout as...")
             exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")

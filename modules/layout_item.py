@@ -100,7 +100,7 @@ class LayoutItem():
     def copyToClipboardCompleted(self,exception,result=None):
         """Copy the image to the clipboard"""
         if not exception:
-            self.parent.iface.messageBar().pushSuccess('Copy layout',f' Successfully copied layout "{result[0]}" to clipboard')
+            self.parent.iface.messageBar().pushSuccess('Copy layout',f' Successfully copied "{result[0]}" to clipboard')
             app = QtWidgets.QApplication.instance()
             clipboard = app.clipboard()
             clipboard.setImage(result[1])
