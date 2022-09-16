@@ -24,6 +24,7 @@ changelog=
         * Reload the panel automatically at QGIS startup
         * Copy first page of the layout directly to the clipboard
         * Support keyboard shortcuts to delete and rename (F2)
+        * Added layout template for A3
         * Export layouts using background tasks
         * Use QGIS settings to manage search patch for layout templates
         * Added map scale in tooltip
