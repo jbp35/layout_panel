@@ -24,11 +24,11 @@
 
 import os
 
-from qgis.PyQt import QtGui, QtWidgets, uic, QtXml
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QUrl, QDir, QFileInfo, QFileSystemWatcher, QEvent, QSettings
+from qgis.PyQt import  QtWidgets, uic
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QEvent
 from PyQt5.QtWidgets import QAbstractItemView 
-from qgis.core import QgsProject, QgsPrintLayout, QgsLayoutExporter, QgsSettings, QgsReadWriteContext, QgsApplication, QgsUnitTypes, QgsMessageLog
-from PyQt5.QtGui import QFontDatabase, QRawFont
+from qgis.core import QgsMessageLog
+
 
 from .modules.project import Project
 from .modules.layout_list import LayoutList
@@ -50,10 +50,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.setupUi(self)
 
         self.iface = iface
-        
-        # Install required fonts for default layout templates
-        self.installFont()
-                        
+                               
         # Initialize modules
         self.project = Project(parent=self)
         self.layout_list = LayoutList(parent=self)
@@ -112,29 +109,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         QgsMessageLog.logMessage(str(msg), "Layout Panel")
     
         
-    def installFont(self):
-        """Install fonts required for layout templates   """
-        typeface_list = ["Roboto","Open_Sans"]
-        installed_fonts = QFontDatabase().families()
-        font_list = []  
-        
-        #List all the fonts of each family
-        for typeface_name in typeface_list:
-            typeface_dir=os.path.dirname(os.path.realpath(__file__)) + '/fonts/' + typeface_name
-            dir = QDir(typeface_dir)
-            dir.setFilter(QDir.Files)
-            dir.setNameFilters(["*.ttf"])
-            for font in dir.entryList():
-                font_list.append(dir.filePath(font))
 
-        # Install all the fonts if they are not already installed
-        for font in font_list:  
-            raw_name = QRawFont(font, 12, 0).familyName()
-            if raw_name not in installed_fonts:
-                QFontDatabase.addApplicationFont(font)
-    
-
-#TODO: copy to clipboard directly as image 
 #TODO: update extent of refence map automatically after creating layout from template              
 #TODO: Show layout extent on canvas/to new layer/ zoom to map extent /mask 
 #TODO: quick print layout?
