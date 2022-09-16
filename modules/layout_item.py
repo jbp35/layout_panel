@@ -2,7 +2,6 @@ from qgis.PyQt import QtWidgets, QtXml
 from qgis.PyQt.QtCore import  QUrl, QDir, QFileInfo
 from qgis.core import QgsPrintLayout, QgsLayoutExporter,  QgsReadWriteContext, QgsApplication
 
-
 class LayoutItem():
     def __init__(self,parent=None):
         """Initialize the layout item"""
@@ -90,3 +89,18 @@ class LayoutItem():
         if not exception:
             href = f'<a href="{QUrl.fromLocalFile(result).toString()}">{QDir.toNativeSeparators(result)}</a>'
             self.parent.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
+          
+            
+    def copyToClipboard(self,task,layout):
+        """Export selected layout to image"""
+        export = QgsLayoutExporter(layout)
+        image = export.renderPageToImage(0)
+        return layout.name(), image
+        
+    def copyToClipboardCompleted(self,exception,result=None):
+        """Copy the image to the clipboard"""
+        if not exception:
+            self.parent.iface.messageBar().pushSuccess('Copy layout',f' Successfully copied layout "{result[0]}" to clipboard')
+            app = QtWidgets.QApplication.instance()
+            clipboard = app.clipboard()
+            clipboard.setImage(result[1])

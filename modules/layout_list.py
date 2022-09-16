@@ -43,6 +43,7 @@ class LayoutList():
                     page_size_text = 'variable'
                 
                 # map scale
+                #TODO : update list when layout changes
                 reference_map=layout.referenceMap()
                 if reference_map:
                     map_scale=f'1:{round(reference_map.scale())}'

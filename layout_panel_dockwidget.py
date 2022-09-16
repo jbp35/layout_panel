@@ -134,16 +134,17 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 QFontDatabase.addApplicationFont(font)
     
 
-
-
-#TODO: copy to clipboard directly               
+#TODO: copy to clipboard directly as image 
+#TODO: update extent of refence map automatically after creating layout from template              
+#TODO: Show layout extent on canvas/to new layer/ zoom to map extent /mask 
+#TODO: quick print layout?
 #TODO: cleanup the code
-#TODO: Export as background task
 #TODO: update statusbar
+#TODO: standard paper format in tooltip (A4, A3, etc.)
 #TODO: translation TR
 #TODO: Filter tool button? filter by size, page count, expression, etc.
-#TODO: add sortable columns, like page size, number of pages, date created/modified, etc.
 #TODO: Add support for reports
 #TODO: Support for drag & drop
-#TODO: quick print layout?
+#TODO: edit default export settings
 #TODO: icons for layout templates
+#TODO: Export layout list as table

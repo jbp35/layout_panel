@@ -21,6 +21,7 @@ class ContextMenu():
         renameAction = None
         removeAction = None
         saveAsTemplateAction = None
+        copyToClipboardAction = None
         exportMenu = None
         exportPDFAction = None
         exportImageAction = None
@@ -44,6 +45,8 @@ class ContextMenu():
             menu.addSeparator()
             saveAsTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveLayoutTemplate.svg"), "Save Layout as Template...")
             menu.addSeparator()
+            shareToMenu=menu.addMenu("Share to...")
+            copyToClipboardAction = shareToMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Copy to clipboard")
             exportMenu=menu.addMenu("Export Layout as...")
             exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
             exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
@@ -74,6 +77,8 @@ class ContextMenu():
             self.parent.layout_item.renameLayout()
         elif action == saveAsTemplateAction:
             self.parent.layout_item.saveAsTemplate()
+        elif action == copyToClipboardAction :
+            self.copyToClipboard()
         elif action == exportPDFAction:
             self.exportSelectedLayouts("PDF")
         elif action == exportImageAction:
@@ -83,6 +88,18 @@ class ContextMenu():
         else:
             return
 
+
+    def copyToClipboard(self):
+        """Copy selected layout to clipboard"""
+        layout_manager= self.parent.project.getLayoutManager()
+        selectedLayouts = self.parent.listWidget.selectedItems()
+        layout = layout_manager.layoutByName(selectedLayouts[0].text())
+        self.task = QgsTask.fromFunction('Copy to clipboard: ' + layout.name(), 
+                                         self.parent.layout_item.copyToClipboard, 
+                                         on_finished=self.parent.layout_item.copyToClipboardCompleted,
+                                         layout=layout)
+        QgsApplication.taskManager().addTask(self.task)
+    
              
     def exportSelectedLayouts(self, format):
         """Export selected layouts"""
