@@ -52,7 +52,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.iface = iface
                                
         # Initialize modules
-        self.project = Project(parent=self)
+        plugin_dir = os.path.dirname(os.path.realpath(__file__))
+        self.project = Project(plugin_dir,parent=self)
         self.layout_list = LayoutList(parent=self)
         self.layout_item = LayoutItem(parent=self)
         self.context_menu = ContextMenu(parent=self)

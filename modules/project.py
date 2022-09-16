@@ -5,12 +5,13 @@ from qgis.core import QgsApplication, QgsProject, QgsPrintLayout,QgsSettings,Qgs
 from qgis.PyQt import QtXml
 
 class Project():
-    def __init__(self,parent=None):
+    def __init__(self,plugin_dir,parent=None):
         """Initialize qgis project"""
         self.parent = parent
         self.project_instance = None
         self.project_layout_manager = None
         self.last_used_folder = None
+        self.plugin_dir=plugin_dir
         
         QgsProject.instance().readProject.connect(self.updateProjectInstance)
         QgsProject.instance().cleared.connect(self.updateProjectInstance)
@@ -54,16 +55,17 @@ class Project():
         QgsSettings().setValue('APP/lastLayoutExportDir', path)
         self.last_used_folder = path
         
+        
     def getSearchPathsForTemplates(self):
         """return a list a path to search for templates"""
         searchPathsForTemplates=[]
         
-        #add layout panel template folder
-        searchPathsForTemplates.append(os.path.dirname(os.path.realpath(__file__)) + '/templates')
-
         #add default path
         searchPathsForTemplates.append(self.getDefaultTemplateFolderPath())
         
+        #add layout panel template folder
+        searchPathsForTemplates.append(self.plugin_dir + '/templates')
+      
         #add additional paths
         additional_path_list=QSettings().value("core/Layout/searchPathsForTemplates")
         for path in additional_path_list:
