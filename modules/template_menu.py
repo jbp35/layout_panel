@@ -56,13 +56,13 @@ class TemplateMenu():
         editTemplatePathsAction = self.template_menu.addAction("Layout Templates Settings...")
         editTemplatePathsAction.setData(["editTemplatePaths"])
         openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Default Template Folder")
-        openTemplateFolderAction.setData(["openTemplateFolderAction", search_paths_for_templates[0]])
+        openTemplateFolderAction.setData(["openTemplateFolderAction"])
         
 
     def templateMenuTriggered(self, layoutTemplateAction):
         """Called when template menu is triggered"""
         if layoutTemplateAction.data()[0] == "openTemplateFolderAction":
-            QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(layoutTemplateAction.data()[1]))
+            QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(self.parent.project.getDefaultTemplateFolderPath()))
         
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
             fname = QtWidgets.QFileDialog.getOpenFileName(self.parent, 'Choose a template to create a new layout', self.parent.project.getLastUsedFolder(), 'Layout templates (*.qpt *.QPT)')

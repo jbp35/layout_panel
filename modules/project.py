@@ -56,12 +56,25 @@ class Project():
         
     def getSearchPathsForTemplates(self):
         """return a list a path to search for templates"""
+        searchPathsForTemplates=[]
         
-        #TODO: first item in the list shoudl be default template folder
-        searchPathsForTemplates=QSettings().value("core/Layout/searchPathsForTemplates")
-        searchPathsForTemplates.append(QgsApplication.qgisSettingsDirPath()+'composer_templates')
+        #add layout panel template folder
         searchPathsForTemplates.append(os.path.dirname(os.path.realpath(__file__)) + '/templates')
+
+        #add default path
+        searchPathsForTemplates.append(self.getDefaultTemplateFolderPath())
+        
+        #add additional paths
+        additional_path_list=QSettings().value("core/Layout/searchPathsForTemplates")
+        for path in additional_path_list:
+            searchPathsForTemplates.append(path)
+            
         return searchPathsForTemplates
+    
+    
+    def getDefaultTemplateFolderPath(self):
+        """return default folder for layout templates"""
+        return QgsApplication.qgisSettingsDirPath()+'composer_templates'
         
         
     def createNewLayout(self):
