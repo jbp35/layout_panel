@@ -20,6 +20,7 @@ class ContextMenu():
         duplicateAction = None
         renameAction = None
         removeAction = None
+        showExtentAction = None
         saveAsTemplateAction = None
         copyToClipboardAction = None
         exportMenu = None
@@ -42,6 +43,8 @@ class ContextMenu():
             duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), "Duplicate Layout")
             renameAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionRename.svg"),"Rename Layout")
             removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"),"Remove Layout...")
+            #TODO: add icon
+            showExtentAction = menu.addAction("Show Layout Extent...")
             menu.addSeparator()
             saveAsTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveLayoutTemplate.svg"), "Save Layout as Template...")
             menu.addSeparator()
@@ -76,6 +79,8 @@ class ContextMenu():
             self.parent.layout_list.duplicateSelectedLayouts()
         elif action == renameAction:
             self.parent.layout_item.renameLayout()
+        elif action == showExtentAction:
+            self.parent.rubber_band.drawExtent()
         elif action == saveAsTemplateAction:
             self.parent.layout_item.saveAsTemplate()
         elif action == copyToClipboardAction :

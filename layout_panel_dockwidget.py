@@ -29,12 +29,12 @@ from qgis.PyQt.QtCore import pyqtSignal, Qt, QEvent
 from PyQt5.QtWidgets import QAbstractItemView 
 from qgis.core import QgsMessageLog
 
-
 from .modules.project import Project
 from .modules.layout_list import LayoutList
 from .modules.layout_item import LayoutItem
 from .modules.context_menu import ContextMenu
 from .modules.template_menu import TemplateMenu
+from .modules.rubber_band import RubberBand
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'layout_panel_dockwidget_base.ui'))
@@ -58,6 +58,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.layout_item = LayoutItem(parent=self)
         self.context_menu = ContextMenu(parent=self)
         self.template_menu = TemplateMenu(parent=self)
+        self.rubber_band = RubberBand(parent=self)
         
         #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
         self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -108,6 +109,9 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def log(self, msg):
         """Helper to log msg in QGIS used for debug only"""
         QgsMessageLog.logMessage(str(msg), "Layout Panel")
+        
+
+        
     
         
 

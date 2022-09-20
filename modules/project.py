@@ -68,8 +68,9 @@ class Project():
       
         #add additional paths
         additional_path_list=QSettings().value("core/Layout/searchPathsForTemplates")
-        for path in additional_path_list:
-            searchPathsForTemplates.append(path)
+        if additional_path_list:
+            for path in additional_path_list:
+                searchPathsForTemplates.append(path)
             
         return searchPathsForTemplates
     
