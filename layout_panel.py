@@ -24,6 +24,8 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsMessageLog
+import time
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -73,6 +75,11 @@ class LayoutPanel:
 
         self.pluginIsActive = False
         self.dockwidget = None
+        
+    def log(self, msg):
+        """Helper to log msg in QGIS used for debug only"""
+        QgsMessageLog.logMessage(str(msg), "Layout Panel")
+        
 
 
     def tr(self, message):
@@ -165,27 +172,26 @@ class LayoutPanel:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
+        
+        self.log("init")
+        
         icon_path = ':/plugins/layout_panel/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Layout Panel'),
             callback=self.run,
             parent=self.iface.mainWindow())
-        
-        #Reload the plugin automatically when qgis start if it was open during last session
-        pluginIsActiveStore = QSettings().value('plugins/layoutpanel/pluginIsActive', False, type=bool)
-        if pluginIsActiveStore:
-            self.run()
-
+                
+        if self.dockwidget == None:
+            self.dockwidget = LayoutPanelDockWidget(self.iface, self.iface.mainWindow())
+            
+        self.dockwidget.closingPlugin.connect(self.onClosePlugin)
+        self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
+              
 
     def onClosePlugin(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
-
-        self.dockwidget.closingPlugin.disconnect(self.onClosePlugin)
-        self.iface.removeDockWidget(self.dockwidget)
         self.pluginIsActive = False
-        QSettings().setValue('plugins/layoutpanel/pluginIsActive', False)
 
 
     def unload(self):
@@ -202,14 +208,7 @@ class LayoutPanel:
 
     def run(self):
         """Run method that loads and starts the plugin"""
-
         if not self.pluginIsActive:
             self.pluginIsActive = True
-            QSettings().setValue('plugins/layoutpanel/pluginIsActive', True)
-
-            if self.dockwidget == None:
-                self.dockwidget = LayoutPanelDockWidget(self.iface)
-         
-            self.dockwidget.closingPlugin.connect(self.onClosePlugin)
-            self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
+                

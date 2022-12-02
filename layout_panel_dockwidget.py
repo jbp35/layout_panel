@@ -47,8 +47,9 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def __init__(self, iface, parent=None):
         """Initialize the layout panel"""
         super(LayoutPanelDockWidget, self).__init__(parent)
-        self.setupUi(self)
 
+        self.setupUi(self)
+        self.setObjectName("Layout Panel")
         self.iface = iface
                                
         # Initialize modules

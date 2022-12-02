@@ -78,7 +78,7 @@ class Project():
     def getDefaultTemplateFolderPath(self):
         """return default folder for layout templates"""
         return QgsApplication.qgisSettingsDirPath()+'composer_templates'
-        
+        #TODO: Fix path if current user is not default
         
     def createNewLayout(self):
         """Create a new blank layout"""
