@@ -92,7 +92,7 @@
       <item>
        <widget class="QToolButton" name="tbShowExtents">
         <property name="toolTip">
-         <string>Show Layout Map Extents (click an extent to open its layout)</string>
+         <string>Show Layout Map Extents (click an extent to open its layout, drag its center to move it)</string>
         </property>
         <property name="text">
          <string>...</string>
