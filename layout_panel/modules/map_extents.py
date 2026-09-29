@@ -1,9 +1,10 @@
-from qgis.PyQt import sip
 from qgis.PyQt.QtCore import QEvent, QObject, QPointF, QRectF, Qt
 from qgis.PyQt.QtGui import QBrush, QColor, QFont, QPainterPath, QPen, QPolygonF
 from qgis.core import (QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsLayoutItemMap,
                        QgsPointXY, QgsProject, QgsSettings)
 from qgis.gui import QgsMapCanvasItem
+
+from .signal_relay import SignalRelay
 
 SETTINGS_KEY = 'layout_panel/showMapExtents'
 LINE_COLOR = QColor('#3388ff')
@@ -81,22 +82,21 @@ class MapExtents(QObject):
     Double-clicking an extent opens its layout."""
 
     def __init__(self, parent=None):
-        super().__init__()
-        self.parent = parent
+        super().__init__(parent)
+        self.panel = parent
         self.canvas = parent.iface.mapCanvas()
         self.item = None
-        self.watched = []
+        self.relay = SignalRelay(self.refresh, self)
+
+        layout_manager = QgsProject.instance().layoutManager()
+        self.relay.watch(layout_manager.layoutAdded)
+        self.relay.watch(layout_manager.layoutRemoved)
+        self.relay.watch(layout_manager.layoutRenamed)
+        self.relay.watch(self.canvas.destinationCrsChanged)
 
         button = parent.tbShowExtents
         button.setChecked(QgsSettings().value(SETTINGS_KEY, False, type=bool))
         button.toggled.connect(self.setVisible)
-
-        layout_manager = QgsProject.instance().layoutManager()
-        layout_manager.layoutAdded.connect(self.refresh)
-        layout_manager.layoutRemoved.connect(self.refresh)
-        layout_manager.layoutRenamed.connect(self.refresh)
-        self.canvas.destinationCrsChanged.connect(self.refresh)
-
         self.setVisible(button.isChecked())
 
     def setVisible(self, visible):
@@ -105,60 +105,38 @@ class MapExtents(QObject):
             self.item = MapExtentsItem(self.canvas)
             self.canvas.viewport().installEventFilter(self)
         elif not visible and self.item is not None:
-            self.canvas.viewport().removeEventFilter(self)
-            self.canvas.scene().removeItem(self.item)
-            self.item = None
+            self.removeItem()
         self.refresh()
 
-    def refresh(self, *args):
-        """Watch map items so the overlay follows extent changes, then repaint"""
-        self.unwatch()
+    def refresh(self):
+        """Watch layouts and map items so the overlay follows their changes, then repaint"""
         if self.item is None:
             return
         for layout in QgsProject.instance().layoutManager().printLayouts():
-            self.watch(layout.changed)
+            self.relay.watch(layout.changed)
             for item in layout.items():
                 if isinstance(item, QgsLayoutItemMap):
-                    self.watch(item.extentChanged)
-                    self.watch(item.mapRotationChanged)
-                    self.watch(item.crsChanged)
+                    self.relay.watch(item.extentChanged)
+                    self.relay.watch(item.mapRotationChanged)
+                    self.relay.watch(item.crsChanged)
         self.item.update()
 
-    def watch(self, signal):
-        signal.connect(self.repaint)
-        self.watched.append(signal)
-
-    def unwatch(self):
-        for signal in self.watched:
-            try:
-                signal.disconnect(self.repaint)
-            except (RuntimeError, TypeError):
-                # the layout or map item has been deleted
-                pass
-        self.watched = []
-
-    def repaint(self, *args):
-        if self.item is not None and not sip.isdeleted(self.item):
-            self.item.update()
+    def removeItem(self):
+        self.canvas.viewport().removeEventFilter(self)
+        self.canvas.scene().removeItem(self.item)
+        self.item = None
 
     def eventFilter(self, watched, event):
         if event.type() == QEvent.Type.MouseButtonDblClick and self.item is not None:
             map_point = self.canvas.getCoordinateTransform().toMapCoordinates(event.pos())
             layout = self.item.layoutAt(map_point)
             if layout is not None:
-                self.parent.iface.openLayoutDesigner(layout)
+                self.panel.iface.openLayoutDesigner(layout)
                 return True
         return False
 
     def cleanup(self):
         """Remove the overlay and disconnect signals when the plugin is unloaded"""
-        self.unwatch()
+        self.relay.delete()
         if self.item is not None:
-            self.canvas.viewport().removeEventFilter(self)
-            self.canvas.scene().removeItem(self.item)
-            self.item = None
-        layout_manager = QgsProject.instance().layoutManager()
-        layout_manager.layoutAdded.disconnect(self.refresh)
-        layout_manager.layoutRemoved.disconnect(self.refresh)
-        layout_manager.layoutRenamed.disconnect(self.refresh)
-        self.canvas.destinationCrsChanged.disconnect(self.refresh)
+            self.removeItem()
