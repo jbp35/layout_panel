@@ -8,6 +8,10 @@
       <translation>Nouvelle mise en page</translation>
     </message>
     <message>
+      <source>Create Group...</source>
+      <translation>Créer un groupe…</translation>
+    </message>
+    <message>
       <source>Export All Layouts as...</source>
       <translation>Tout exporter</translation>
     </message>
@@ -34,6 +38,26 @@
     <message>
       <source>Choose folder to save multiple files</source>
       <translation>Choisir le dossier où enregistrer les fichiers</translation>
+    </message>
+    <message>
+      <source>Rename Group</source>
+      <translation>Renommer</translation>
+    </message>
+    <message>
+      <source>Remove Group...</source>
+      <translation>Supprimer…</translation>
+    </message>
+    <message>
+      <source>Group Selected...</source>
+      <translation>Grouper la sélection…</translation>
+    </message>
+    <message>
+      <source>Export Group as...</source>
+      <translation>Exporter</translation>
+    </message>
+    <message>
+      <source>Choose a file name to export the layout</source>
+      <translation>Choisir un nom de fichier pour exporter la mise en page</translation>
     </message>
     <message>
       <source>Open Layout</source>
@@ -64,8 +88,8 @@
       <translation>Exporter</translation>
     </message>
     <message>
-      <source>Choose a file name to export the layout</source>
-      <translation>Choisir un nom de fichier pour exporter la mise en page</translation>
+      <source>Reports cannot be exported from the panel: {names}</source>
+      <translation>Les rapports ne peuvent pas être exportés depuis le panneau : {names}</translation>
     </message>
     <message>
       <source>Save Layout as Template...</source>
@@ -82,10 +106,6 @@
     <message>
       <source>Export Layout as...</source>
       <translation>Exporter</translation>
-    </message>
-    <message>
-      <source>Reports cannot be exported from the panel: {names}</source>
-      <translation>Les rapports ne peuvent pas être exportés depuis le panneau : {names}</translation>
     </message>
     <message>
       <source>{format} format</source>
@@ -160,12 +180,36 @@
       <translation>Inconnue</translation>
     </message>
     <message>
+      <source>Group name:</source>
+      <translation>Nom du groupe :</translation>
+    </message>
+    <message>
+      <source>Create Group</source>
+      <translation>Créer un groupe</translation>
+    </message>
+    <message>
+      <source>Group Selected</source>
+      <translation>Grouper la sélection</translation>
+    </message>
+    <message>
       <source>variable</source>
       <translation>variable</translation>
     </message>
     <message>
       <source>Report</source>
       <translation>Rapport</translation>
+    </message>
+    <message>
+      <source>Remove Group</source>
+      <translation>Supprimer le groupe</translation>
+    </message>
+    <message>
+      <source>Layout Count: {count}</source>
+      <translation>Nombre de mises en page : {count}</translation>
+    </message>
+    <message>
+      <source>Group {number}</source>
+      <translation>Groupe {number}</translation>
     </message>
     <message>
       <source>Page Count: {count}</source>
@@ -186,6 +230,10 @@
     <message>
       <source>Remove Selected Layouts</source>
       <translation>Supprimer les mises en page sélectionnées</translation>
+    </message>
+    <message>
+      <source>Are you sure you want to remove permanently the group "{name}" and its {count} layouts?</source>
+      <translation>Voulez-vous vraiment supprimer définitivement le groupe « {name} » et ses {count} mises en page ?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

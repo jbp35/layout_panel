@@ -8,6 +8,10 @@
       <translation>Neues Drucklayout</translation>
     </message>
     <message>
+      <source>Create Group...</source>
+      <translation>Gruppe erstellen…</translation>
+    </message>
+    <message>
       <source>Export All Layouts as...</source>
       <translation>Alle exportieren</translation>
     </message>
@@ -34,6 +38,26 @@
     <message>
       <source>Choose folder to save multiple files</source>
       <translation>Ordner zum Speichern der Dateien wählen</translation>
+    </message>
+    <message>
+      <source>Rename Group</source>
+      <translation>Umbenennen</translation>
+    </message>
+    <message>
+      <source>Remove Group...</source>
+      <translation>Löschen…</translation>
+    </message>
+    <message>
+      <source>Group Selected...</source>
+      <translation>Auswahl gruppieren…</translation>
+    </message>
+    <message>
+      <source>Export Group as...</source>
+      <translation>Exportieren</translation>
+    </message>
+    <message>
+      <source>Choose a file name to export the layout</source>
+      <translation>Dateinamen für den Layoutexport wählen</translation>
     </message>
     <message>
       <source>Open Layout</source>
@@ -64,8 +88,8 @@
       <translation>Exportieren</translation>
     </message>
     <message>
-      <source>Choose a file name to export the layout</source>
-      <translation>Dateinamen für den Layoutexport wählen</translation>
+      <source>Reports cannot be exported from the panel: {names}</source>
+      <translation>Berichte können nicht aus dem Bedienfeld exportiert werden: {names}</translation>
     </message>
     <message>
       <source>Save Layout as Template...</source>
@@ -82,10 +106,6 @@
     <message>
       <source>Export Layout as...</source>
       <translation>Exportieren</translation>
-    </message>
-    <message>
-      <source>Reports cannot be exported from the panel: {names}</source>
-      <translation>Berichte können nicht aus dem Bedienfeld exportiert werden: {names}</translation>
     </message>
     <message>
       <source>{format} format</source>
@@ -160,12 +180,36 @@
       <translation>Unbekannt</translation>
     </message>
     <message>
+      <source>Group name:</source>
+      <translation>Gruppenname:</translation>
+    </message>
+    <message>
+      <source>Create Group</source>
+      <translation>Gruppe erstellen</translation>
+    </message>
+    <message>
+      <source>Group Selected</source>
+      <translation>Auswahl gruppieren</translation>
+    </message>
+    <message>
       <source>variable</source>
       <translation>variabel</translation>
     </message>
     <message>
       <source>Report</source>
       <translation>Bericht</translation>
+    </message>
+    <message>
+      <source>Remove Group</source>
+      <translation>Gruppe löschen</translation>
+    </message>
+    <message>
+      <source>Layout Count: {count}</source>
+      <translation>Anzahl der Layouts: {count}</translation>
+    </message>
+    <message>
+      <source>Group {number}</source>
+      <translation>Gruppe {number}</translation>
     </message>
     <message>
       <source>Page Count: {count}</source>
@@ -186,6 +230,10 @@
     <message>
       <source>Remove Selected Layouts</source>
       <translation>Ausgewählte Layouts löschen</translation>
+    </message>
+    <message>
+      <source>Are you sure you want to remove permanently the group "{name}" and its {count} layouts?</source>
+      <translation>Möchten Sie die Gruppe „{name}“ und ihre {count} Layouts wirklich endgültig löschen?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

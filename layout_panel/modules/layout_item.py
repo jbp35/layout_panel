@@ -2,14 +2,16 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt, QUrl, QDir, QFileInfo
 from qgis.core import QgsLayoutExporter, QgsReadWriteContext
 from .i18n import tr
+from .layout_list import FOLDER_PATH_ROLE, splitName
 
 class LayoutItem():
     def __init__(self,parent=None):
         """Initialize the layout item"""
         self.parent = parent
         
-        # Used to store the initial name of the layout before entering editor mode
+        # Used to store the initial name of the layout, or path of the folder, before entering editor mode
         self.name_before_rename = None
+        self.folder_before_rename = None
 
 
     def layoutByName(self, layout_name):
@@ -18,16 +20,29 @@ class LayoutItem():
         
     def currentLayout(self):
         """Return the first selected layout, or None if nothing is selected"""
-        selected_items = self.parent.listWidget.selectedItems()
-        if not selected_items:
+        layout_names = [self.parent.layout_list.layoutName(item) for item in self.parent.listWidget.selectedItems()]
+        layout_names = [name for name in layout_names if name is not None]
+        if not layout_names:
             return None
-        return self.layoutByName(selected_items[0].text())
+        return self.layoutByName(layout_names[0])
 
     def openCurrentLayout(self):
-        """Open currently selected layout in editor"""
+        """Open currently selected layout in editor, or expand or collapse the current folder"""
+        item = self.parent.listWidget.currentItem()
+        if item is not None and item.isSelected() and item.isFolder():
+            item.setExpanded(not item.isExpanded())
+            return
         layout = self.currentLayout()
         if layout:
             self.parent.iface.openLayoutDesigner(layout)
+
+    def openLayoutItem(self, item):
+        """Open the layout of a double-clicked item (a double-click on a folder expands or collapses it)"""
+        layout_name = self.parent.layout_list.layoutName(item)
+        if layout_name is not None:
+            layout = self.layoutByName(layout_name)
+            if layout:
+                self.parent.iface.openLayoutDesigner(layout)
     
     def duplicateLayout(self, layout_name):
         """Duplicate the layout"""
@@ -44,19 +59,35 @@ class LayoutItem():
           
 
     def renameLayout(self):
-        """Open editor mode to rename currently selected layout"""
+        """Open editor mode to rename currently selected layout or folder"""
         selected_items = self.parent.listWidget.selectedItems()
         if not selected_items:
             return
-        self.name_before_rename = selected_items[0].text()
-        self.parent.listWidget.editItem(selected_items[0])
+        item = selected_items[0]
+        self.name_before_rename = self.parent.layout_list.layoutName(item)
+        self.folder_before_rename = item.data(0, FOLDER_PATH_ROLE)
+        self.parent.listWidget.editItem(item)
 
 
     def renameLayoutClosedEditor(self, editor):
-        """Called when editor mode is closed to rename the layout"""
+        """Called when editor mode is closed to rename the layout or folder"""
         old_name = self.name_before_rename
+        old_folder = self.folder_before_rename
         self.name_before_rename = None
+        self.folder_before_rename = None
         new_name = editor.text().strip()
+
+        if old_folder is not None:
+            if new_name == old_folder:
+                return
+            if splitName(new_name) == [new_name] and '/' in new_name:
+                # only slashes
+                self.parent.iface.messageBar().pushWarning(tr('Failed to rename layout'), ' ' + tr('Entered layout name already exists or is invalid.'))
+            elif new_name:
+                self.parent.layout_list.renameFolder(old_folder, new_name)
+            self.parent.layout_list.updateLayoutList()
+            return
+
         if old_name is None or new_name == old_name:
             return
 
@@ -82,7 +113,7 @@ class LayoutItem():
             return
         template_dir = QDir(self.parent.project.getDefaultTemplateFolderPath())
         file_path = QtWidgets.QFileDialog.getSaveFileName(self.parent, tr('Choose a file name to save the layout as template'),
-                                                      template_dir.filePath(current_layout.name() + '.qpt'),
+                                                      template_dir.filePath(splitName(current_layout.name())[-1] + '.qpt'),
                                                       tr('Layout templates') + ' (*.qpt *.QPT)')[0]
         if file_path != '':
             template=current_layout.saveAsTemplate(file_path, QgsReadWriteContext())

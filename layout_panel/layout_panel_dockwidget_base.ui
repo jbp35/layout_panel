@@ -143,7 +143,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="listWidget">
+     <widget class="QTreeWidget" name="listWidget">
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
@@ -156,14 +156,8 @@
       <property name="tabKeyNavigation">
        <bool>true</bool>
       </property>
-      <property name="showDropIndicator" stdset="0">
-       <bool>false</bool>
-      </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="viewMode">
-       <enum>QListView::ListMode</enum>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
