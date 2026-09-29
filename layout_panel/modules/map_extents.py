@@ -184,7 +184,9 @@ class LayoutExtentsMapTool(QgsMapToolPan):
 
     def flags(self):
         # no canvas context menu: right-click leaves the tool instead
-        return super().flags() & ~QgsMapTool.Flag.ShowContextMenu
+        flags = super().flags()
+        # rebuild the flags type: QGIS rejects the plain int that `&` returns
+        return type(flags)(int(flags) & ~int(QgsMapTool.Flag.ShowContextMenu))
 
     def layoutAt(self, event):
         item = self.map_extents.item
