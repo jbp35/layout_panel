@@ -23,6 +23,16 @@ jobs:
       - name: Install qgis-plugin-ci
         run: pip3 install qgis-plugin-ci
 
+      # plugins.qgis.org registered the plugin as "layout_panel-main" (0.3 was uploaded
+      # from a GitHub zip), so the package folder must keep that name for users to get updates
+      - name: Rename plugin folder to its plugins.qgis.org package name
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git mv layout_panel layout_panel-main
+          sed -i 's/^plugin_path: layout_panel$/plugin_path: layout_panel-main/' .qgis-plugin-ci
+          git commit -qam "Rename plugin folder for packaging"
+
       - name: Deploy plugin
         run: >-
           qgis-plugin-ci
