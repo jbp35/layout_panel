@@ -233,3 +233,4 @@ fabric.properties
 .mcp.json
 .idea/
 dist/
+*.zip

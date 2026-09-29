@@ -6,7 +6,6 @@ This plugin adds a new panel to manage print layouts directly from QGIS main win
 
 - `layout_panel/`: the plugin itself. This is the only folder shipped to users.
 - `test/`: tests, not shipped.
-- `scripts/`: development helpers, not shipped.
 
 ## Development
 
@@ -20,8 +19,6 @@ On Linux/macOS use `ln -s` to the equivalent `python/plugins` folder.
 
 ## Publishing
 
-```
-python scripts/package.py
-```
+Publishing a GitHub release runs `.github/workflows/release.yml`, which uses [qgis-plugin-ci](https://github.com/opengisch/qgis-plugin-ci) to package the `layout_panel/` folder (see `.qgis-plugin-ci`) and upload it to plugins.qgis.org. The release tag becomes the plugin version.
 
-This writes `dist/layout_panel-<version>.zip`, ready to upload to plugins.qgis.org.
+To build the zip locally: `qgis-plugin-ci package <version>`.

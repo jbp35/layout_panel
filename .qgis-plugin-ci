@@ -1,0 +1,5 @@
+plugin_path: layout_panel
+github_organization_slug: jbp35
+project_slug: layout_panel
+# The changelog lives in layout_panel/metadata.txt, there is no CHANGELOG.md
+changelog_include: false
