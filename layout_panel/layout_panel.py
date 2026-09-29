@@ -26,6 +26,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon, QAction
 
 from .layout_panel_dockwidget import LayoutPanelDockWidget
+from .modules.i18n import installTranslator, removeTranslator
 from .modules.shortcuts import registerShortcut, unregisterShortcut
 
 MENU_NAME = '&Layout Panel'
@@ -38,6 +39,8 @@ class LayoutPanel:
         self.iface = iface
         self.action = None
         self.dockwidget = None
+        # before any widget is created, so they get the translated texts
+        self.translator = installTranslator()
 
     def initGui(self):
         """Create the menu entry, toolbar icon and dock widget."""
@@ -68,6 +71,9 @@ class LayoutPanel:
             # before a reload creates the new one (Plugin Reloader flags it otherwise)
             sip.delete(self.dockwidget)
             self.dockwidget = None
+
+        removeTranslator(self.translator)
+        self.translator = None
 
     def run(self):
         """Show the dock widget"""

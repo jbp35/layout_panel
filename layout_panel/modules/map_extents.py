@@ -5,6 +5,7 @@ from qgis.core import (QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsL
                        QgsPointXY, QgsProject, QgsRectangle)
 from qgis.gui import QgsMapCanvasItem, QgsMapTool, QgsMapToolPan
 
+from .i18n import tr
 from .icons import icon
 from .shortcuts import registerShortcut, unregisterShortcut
 from .signal_relay import SignalRelay
@@ -167,7 +168,7 @@ def moveMapExtent(layout, map_item, center, center_crs):
         center = QgsCoordinateTransform(center_crs, map_item.crs(), QgsProject.instance()).transform(center)
     extent = map_item.extent()
     new_extent = QgsRectangle.fromCenterAndSize(center, extent.width(), extent.height())
-    layout.undoStack().beginCommand(map_item, 'Move Map Extent')
+    layout.undoStack().beginCommand(map_item, tr('Move Map Extent'))
     map_item.setExtent(new_extent)
     layout.undoStack().endCommand()
 
@@ -300,9 +301,10 @@ class MapExtents(QObject):
         self.relay.watch(layout_manager.layoutRenamed)
         self.relay.watch(self.canvas.destinationCrsChanged)
 
-        self.action = QAction(icon('mActionShowLayoutExtents.svg'), 'Layout Panel: Show Layout Map Extents', self)
-        self.action.setToolTip('Show Layout Map Extents (click an extent to open its layout, '
-                               'drag its center to move it, right-click to exit)')
+        self.action = QAction(icon('mActionShowLayoutExtents.svg'),
+                              'Layout Panel: ' + tr('Show Layout Map Extents'), self)
+        self.action.setToolTip(tr('Show Layout Map Extents (click an extent to open its layout, '
+                                  'drag its center to move it, right-click to exit)'))
         self.action.setCheckable(True)
         # also in the main window so its shortcut works while the panel is hidden
         registerShortcut(self.action, 'mActionLayoutPanelShowMapExtents', 'Ctrl+Alt+X')

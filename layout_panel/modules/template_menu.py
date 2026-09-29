@@ -1,5 +1,6 @@
 from qgis.PyQt import QtGui, QtWidgets
 from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo
+from .i18n import tr
 from .icons import icon
 
 
@@ -36,7 +37,7 @@ class TemplateMenu():
 
         #if there is no templates to display show a message
         if not layout_template_list:
-            layoutTemplateAction = self.template_menu.addAction(icon('mActionNewLayout.svg'), 'Template folder is empty')
+            layoutTemplateAction = self.template_menu.addAction(icon('mActionNewLayout.svg'), tr('Template folder is empty'))
             layoutTemplateAction.setEnabled(False)
         
         #add menu action for each template file found
@@ -50,12 +51,12 @@ class TemplateMenu():
         
         
         self.template_menu.addSeparator()
-        selectTemplateAction = self.template_menu.addAction("Choose Another Template File...")
+        selectTemplateAction = self.template_menu.addAction(tr("Choose Another Template File..."))
         selectTemplateAction.setData(["selectTemplateAction"])
-        openTemplateFolderAction = self.template_menu.addAction(icon('mIconFolder.svg'), "Open Default Template Folder")
+        openTemplateFolderAction = self.template_menu.addAction(icon('mIconFolder.svg'), tr("Open Default Template Folder"))
         openTemplateFolderAction.setData(["openTemplateFolderAction"])
         #TODO: add settings icon
-        editTemplatePathsAction = self.template_menu.addAction("Layout Templates Settings...")
+        editTemplatePathsAction = self.template_menu.addAction(tr("Layout Templates Settings..."))
         editTemplatePathsAction.setData(["editTemplatePaths"])
         
 
@@ -65,7 +66,8 @@ class TemplateMenu():
             QtGui.QDesktopServices.openUrl(QUrl.fromLocalFile(self.parent.project.getDefaultTemplateFolderPath()))
         
         elif layoutTemplateAction.data()[0] == "selectTemplateAction":
-            fname = QtWidgets.QFileDialog.getOpenFileName(self.parent, 'Choose a template to create a new layout', self.parent.project.getLastUsedFolder(), 'Layout templates (*.qpt *.QPT)')
+            fname = QtWidgets.QFileDialog.getOpenFileName(self.parent, tr('Choose a template to create a new layout'), self.parent.project.getLastUsedFolder(),
+                                                        tr('Layout templates') + ' (*.qpt *.QPT)')
             if fname[0] != '':
                 self.parent.project.createLayoutFromTemplate(fname[0])
         

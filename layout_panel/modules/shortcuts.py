@@ -2,6 +2,8 @@ from qgis.PyQt.QtCore import QEvent, QObject, Qt
 from qgis.PyQt.QtGui import QAction, QKeySequence
 from qgis.gui import QgsGui
 
+from .i18n import tr, trNoop
+
 try:
     from qgis.PyQt.QtCore import QKeyCombination  # Qt6 only
 except ImportError:
@@ -41,14 +43,14 @@ class PanelShortcuts(QObject):
 
     # (name, text, default shortcut, method of the panel called when triggered)
     SHORTCUTS = [
-        ('mActionLayoutPanelNewLayout', 'New Print Layout', 'Ctrl+N', 'newLayout'),
-        ('mActionLayoutPanelOpenLayout', 'Open Layout', 'Return', 'openLayout'),
-        ('mActionLayoutPanelRenameLayout', 'Rename Layout', 'F2', 'renameLayout'),
-        ('mActionLayoutPanelDuplicateLayout', 'Duplicate Layouts', 'Ctrl+D', 'duplicateLayouts'),
-        ('mActionLayoutPanelRemoveLayout', 'Remove Layouts...', 'Del', 'removeLayouts'),
-        ('mActionLayoutPanelRemoveLayoutNoConfirm', 'Remove Layouts Without Confirmation', 'Shift+Del',
+        ('mActionLayoutPanelNewLayout', trNoop('New Print Layout'), 'Ctrl+N', 'newLayout'),
+        ('mActionLayoutPanelOpenLayout', trNoop('Open Layout'), 'Return', 'openLayout'),
+        ('mActionLayoutPanelRenameLayout', trNoop('Rename Layout'), 'F2', 'renameLayout'),
+        ('mActionLayoutPanelDuplicateLayout', trNoop('Duplicate Layouts'), 'Ctrl+D', 'duplicateLayouts'),
+        ('mActionLayoutPanelRemoveLayout', trNoop('Remove Layouts...'), 'Del', 'removeLayouts'),
+        ('mActionLayoutPanelRemoveLayoutNoConfirm', trNoop('Remove Layouts Without Confirmation'), 'Shift+Del',
          'removeLayoutsWithoutConfirmation'),
-        ('mActionLayoutPanelCopyToClipboard', 'Copy Layout to Clipboard', 'Ctrl+C', 'copyToClipboard'),
+        ('mActionLayoutPanelCopyToClipboard', trNoop('Copy Layout to Clipboard'), 'Ctrl+C', 'copyToClipboard'),
     ]
 
     def __init__(self, panel):
@@ -57,7 +59,7 @@ class PanelShortcuts(QObject):
         self.actions = []
         for name, text, default_shortcut, method in self.SHORTCUTS:
             # the action is not added to any widget, so QGIS never triggers it globally
-            action = QAction(f'Layout Panel: {text}', self)
+            action = QAction('Layout Panel: ' + tr(text), self)
             action.triggered.connect(getattr(panel, method))
             registerShortcut(action, name, default_shortcut)
             self.actions.append(action)
