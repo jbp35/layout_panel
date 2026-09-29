@@ -69,10 +69,20 @@ class MapExtentsItem(QgsMapCanvasItem):
         """Pixel position of the move handle of an extent"""
         return self.toCanvasCoordinates(geometry.centroid().asPoint())
 
+    def pixelPolygon(self, geometry):
+        """The extent polygon in canvas pixels"""
+        return QPolygonF([self.toCanvasCoordinates(QgsPointXY(vertex.x(), vertex.y())) for vertex in geometry.vertices()])
+
+    @staticmethod
+    def hasHandle(layout, map_item, pixel_polygon):
+        """Extents too small on screen get no handle: zoom in to move them"""
+        rect = pixel_polygon.boundingRect()
+        return movable(layout, map_item) and min(rect.width(), rect.height()) >= HANDLE_RADIUS * 5
+
     def handleAt(self, position):
         """Return (layout, map item, center in canvas CRS) of the move handle under the pixel position"""
         for layout, map_item, _, geometry in self.extents():
-            if not movable(layout, map_item):
+            if not self.hasHandle(layout, map_item, self.pixelPolygon(geometry)):
                 continue
             offset = self.handlePosition(geometry) - QPointF(position)
             if offset.manhattanLength() <= HANDLE_RADIUS * 2:
@@ -92,30 +102,25 @@ class MapExtentsItem(QgsMapCanvasItem):
         font.setBold(True)
         painter.setFont(font)
         painter.setRenderHint(painter.RenderHint.Antialiasing)
+        metrics = painter.fontMetrics()
 
+        # draw the highlighted extent last so it stays on top
+        extents = []
         for layout, map_item, label, geometry in self.extents():
-            offset = QPointF()
-            if self.dragged == (layout.name(), map_item.uuid()):
-                offset = self.drag_offset
-            polygon = QPolygonF([self.toCanvasCoordinates(QgsPointXY(vertex.x(), vertex.y())) + offset
-                                 for vertex in geometry.vertices()])
-            highlighted = self.highlighted == (layout.name(), map_item.uuid()) or not offset.isNull()
+            key = (layout.name(), map_item.uuid())
+            offset = self.drag_offset if self.dragged == key else QPointF()
+            polygon = self.pixelPolygon(geometry).translated(offset)
+            highlighted = self.highlighted == key or not offset.isNull()
+            extents.append((highlighted, layout, map_item, label, geometry, polygon, offset))
+        extents.sort(key=lambda extent: extent[0])
+
+        for highlighted, layout, map_item, label, geometry, polygon, offset in extents:
             painter.setPen(QPen(LINE_COLOR, 3 if highlighted else 2))
             painter.setBrush(QBrush(HIGHLIGHT_FILL_COLOR if highlighted else FILL_COLOR))
             painter.drawPolygon(polygon)
 
-            # label inside the top-left corner, with a white halo for readability
-            corner = polygon.boundingRect().topLeft() + QPointF(6, 6 + painter.fontMetrics().ascent())
-            path = QPainterPath()
-            path.addText(corner, font, label)
-            painter.setPen(QPen(QColor(255, 255, 255, 220), 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
-                                Qt.PenJoinStyle.RoundJoin))
-            painter.setBrush(Qt.BrushStyle.NoBrush)
-            painter.drawPath(path)
-            painter.fillPath(path, QBrush(LINE_COLOR.darker(150)))
-
             # move handle: white disc with a cross in the center of the extent
-            if movable(layout, map_item):
+            if self.hasHandle(layout, map_item, polygon):
                 center = self.handlePosition(geometry) + offset
                 painter.setPen(QPen(LINE_COLOR, 2))
                 painter.setBrush(QBrush(QColor(255, 255, 255, 230)))
@@ -123,6 +128,31 @@ class MapExtentsItem(QgsMapCanvasItem):
                 arm = HANDLE_RADIUS - 3
                 painter.drawLine(center + QPointF(-arm, 0), center + QPointF(arm, 0))
                 painter.drawLine(center + QPointF(0, -arm), center + QPointF(0, arm))
+
+        # labels: inside the top-left corner when they fit, above the extent when it is
+        # highlighted, otherwise hidden; never on top of another label
+        drawn = []
+        for highlighted, layout, map_item, label, geometry, polygon, offset in reversed(extents):
+            rect = polygon.boundingRect()
+            text_rect = QRectF(metrics.boundingRect(label))
+            if text_rect.width() + 12 <= rect.width() and text_rect.height() + 12 <= rect.height():
+                baseline = rect.topLeft() + QPointF(6, 6 + metrics.ascent())
+            elif highlighted:
+                baseline = rect.topLeft() + QPointF(0, -6 - metrics.descent())
+            else:
+                continue
+            label_rect = text_rect.translated(baseline).adjusted(-3, -3, 3, 3)
+            if any(label_rect.intersects(other) for other in drawn):
+                continue
+            drawn.append(label_rect)
+
+            path = QPainterPath()
+            path.addText(baseline, font, label)
+            painter.setPen(QPen(QColor(255, 255, 255, 220), 3, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap,
+                                Qt.PenJoinStyle.RoundJoin))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawPath(path)
+            painter.fillPath(path, QBrush(LINE_COLOR.darker(150)))
 
 
 def movable(layout, map_item):
