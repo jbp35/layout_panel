@@ -3,7 +3,7 @@ from qgis.PyQt.QtCore import QObject, QPointF, QRectF, Qt
 from qgis.PyQt.QtGui import QAction, QBrush, QColor, QCursor, QFont, QPainterPath, QPen, QPolygonF
 from qgis.core import (QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsLayoutItemMap,
                        QgsPointXY, QgsProject, QgsRectangle)
-from qgis.gui import QgsMapCanvasItem, QgsMapToolPan
+from qgis.gui import QgsMapCanvasItem, QgsMapTool, QgsMapToolPan
 
 from .icons import icon
 from .signal_relay import SignalRelay
@@ -181,6 +181,10 @@ class LayoutExtentsMapTool(QgsMapToolPan):
         self.press_position = None
         # (layout name, map uuid, start center in canvas CRS) while an extent is being moved
         self.moving = None
+
+    def flags(self):
+        # no canvas context menu: right-click leaves the tool instead
+        return super().flags() & ~QgsMapTool.Flag.ShowContextMenu
 
     def layoutAt(self, event):
         item = self.map_extents.item
