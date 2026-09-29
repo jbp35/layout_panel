@@ -127,7 +127,7 @@ class Project():
 
 
     def zoomMapsToCanvas(self, layout):
-        """Zoom the maps of a new layout to the map canvas, overview maps show a wider area"""
+        """Zoom the maps of a new layout to the map canvas"""
         canvas = self.parent.iface.mapCanvas()
         for item in layout.items():
             if not isinstance(item, QgsLayoutItemMap):
@@ -137,6 +137,4 @@ class Project():
                 extent = transform.transformBoundingBox(canvas.extent())
             except QgsCsException:
                 continue
-            if item.overviews().size():
-                extent.scale(6)
             item.zoomToExtent(extent)
