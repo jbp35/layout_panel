@@ -22,7 +22,6 @@ class ContextMenu():
         duplicateAction = None
         renameAction = None
         removeAction = None
-        showExtentAction = None
         saveAsTemplateAction = None
         copyToClipboardAction = None
         exportMenu = None
@@ -48,7 +47,6 @@ class ContextMenu():
             # Reports only support open, duplicate, rename and remove
             layout = self.parent.layout_item.layoutByName(selectedLayouts[0].text())
             if isinstance(layout, QgsPrintLayout):
-                showExtentAction = menu.addAction("Show Layout Extent...")
                 menu.addSeparator()
                 saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), "Save Layout as Template...")
                 menu.addSeparator()
@@ -82,8 +80,6 @@ class ContextMenu():
             self.parent.layout_list.duplicateSelectedLayouts()
         elif action == renameAction:
             self.parent.layout_item.renameLayout()
-        elif action == showExtentAction:
-            self.parent.rubber_band.drawExtent()
         elif action == saveAsTemplateAction:
             self.parent.layout_item.saveAsTemplate()
         elif action == copyToClipboardAction :

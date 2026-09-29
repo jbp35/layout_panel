@@ -27,6 +27,7 @@ import os
 from qgis.PyQt import QtWidgets, uic
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QAbstractItemView
+from qgis.core import QgsApplication
 
 from .modules.icons import icon
 from .modules.project import Project
@@ -34,7 +35,7 @@ from .modules.layout_list import LayoutList
 from .modules.layout_item import LayoutItem
 from .modules.context_menu import ContextMenu
 from .modules.template_menu import TemplateMenu
-from .modules.rubber_band import RubberBand
+from .modules.map_extents import MapExtents
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'layout_panel_dockwidget_base.ui'))
@@ -54,6 +55,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.pbCreateLayout.setIcon(icon('mActionNewLayout.svg'))
         self.tbTemplateMenu.setIcon(icon('mIconFolder.svg'))
         self.pbDeleteLayout.setIcon(icon('mActionDeleteSelected.svg'))
+        self.tbShowExtents.setIcon(QgsApplication.getThemeIcon('/mLayoutItemMap.svg'))
 
         # Initialize modules
         plugin_dir = os.path.dirname(os.path.realpath(__file__))
@@ -62,7 +64,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.layout_item = LayoutItem(parent=self)
         self.context_menu = ContextMenu(parent=self)
         self.template_menu = TemplateMenu(parent=self)
-        self.rubber_band = RubberBand(parent=self)
+        self.map_extents = MapExtents(parent=self)
         
         #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
         self.listWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -75,7 +77,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.layout_item.renameLayoutClosedEditor)
         self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutList)
-        self.listWidget.itemSelectionChanged.connect(self.rubber_band.clear)
 
 
     def keyPressEvent(self, event):
@@ -103,4 +104,4 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """Disconnect from QGIS signals and remove canvas items when the plugin is unloaded"""
         self.project.cleanup()
         self.layout_list.cleanup()
-        self.rubber_band.cleanup()
+        self.map_extents.cleanup()
