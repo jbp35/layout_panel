@@ -1,3 +1,4 @@
+from qgis.PyQt import sip
 from qgis.PyQt.QtCore import QObject, QPointF, QRectF, Qt
 from qgis.PyQt.QtGui import QAction, QBrush, QColor, QCursor, QFont, QPainterPath, QPen, QPolygonF
 from qgis.core import (QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsLayoutItemMap,
@@ -187,6 +188,11 @@ class LayoutExtentsMapTool(QgsMapToolPan):
         self.map_extents.setHighlighted((hit[0].name(), hit[1].uuid()) if hit else None)
 
     def canvasReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.RightButton and not self.moving:
+            # right-click leaves the tool, like the other QGIS map tools
+            self.press_position = None
+            self.map_extents.exitTool()
+            return
         clicked = (event.button() == Qt.MouseButton.LeftButton and self.press_position is not None
                    and (event.pos() - self.press_position).manhattanLength() <= CLICK_TOLERANCE)
         press_position = self.press_position
@@ -248,6 +254,7 @@ class MapExtents(QObject):
         self.panel = parent
         self.canvas = parent.iface.mapCanvas()
         self.item = None
+        self.previous_tool = None
         self.relay = SignalRelay(self.refresh, self)
 
         layout_manager = QgsProject.instance().layoutManager()
@@ -257,7 +264,7 @@ class MapExtents(QObject):
         self.relay.watch(self.canvas.destinationCrsChanged)
 
         self.action = QAction(icon('mActionShowLayoutExtents.svg'),
-                              'Show Layout Map Extents (click an extent to open its layout, drag its center to move it)', self)
+                              'Show Layout Map Extents (click an extent to open its layout, drag its center to move it, right-click to exit)', self)
         self.action.setCheckable(True)
         self.action.triggered.connect(self.activateTool)
         self.map_tool = LayoutExtentsMapTool(self)
@@ -265,7 +272,17 @@ class MapExtents(QObject):
         parent.tbShowExtents.setDefaultAction(self.action)
 
     def activateTool(self):
+        if self.canvas.mapTool() is not self.map_tool:
+            self.previous_tool = self.canvas.mapTool()
         self.canvas.setMapTool(self.map_tool)
+
+    def exitTool(self):
+        """Go back to the map tool used before, or to the pan tool"""
+        previous_tool, self.previous_tool = self.previous_tool, None
+        if previous_tool is not None and not sip.isdeleted(previous_tool):
+            self.canvas.setMapTool(previous_tool)
+        else:
+            self.panel.iface.actionPan().trigger()
 
     def show(self):
         if self.item is None:
