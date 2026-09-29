@@ -9,7 +9,7 @@
     </message>
     <message>
       <source>Export All Layouts as...</source>
-      <translation>Exporter toutes les mises en page au format…</translation>
+      <translation>Tout exporter</translation>
     </message>
     <message>
       <source>Export as PDF</source>
@@ -37,31 +37,31 @@
     </message>
     <message>
       <source>Open Layout</source>
-      <translation>Ouvrir la mise en page</translation>
+      <translation>Ouvrir</translation>
     </message>
     <message>
       <source>Duplicate Layout</source>
-      <translation>Dupliquer la mise en page</translation>
+      <translation>Dupliquer</translation>
     </message>
     <message>
       <source>Rename Layout</source>
-      <translation>Renommer la mise en page</translation>
+      <translation>Renommer</translation>
     </message>
     <message>
       <source>Remove Layout...</source>
-      <translation>Supprimer la mise en page…</translation>
+      <translation>Supprimer…</translation>
     </message>
     <message>
       <source>Duplicate Layouts</source>
-      <translation>Dupliquer les mises en page</translation>
+      <translation>Dupliquer</translation>
     </message>
     <message>
       <source>Remove Layouts...</source>
-      <translation>Supprimer les mises en page…</translation>
+      <translation>Supprimer…</translation>
     </message>
     <message>
       <source>Export Layouts as...</source>
-      <translation>Exporter les mises en page au format…</translation>
+      <translation>Exporter</translation>
     </message>
     <message>
       <source>Choose a file name to export the layout</source>
@@ -69,7 +69,7 @@
     </message>
     <message>
       <source>Save Layout as Template...</source>
-      <translation>Enregistrer la mise en page comme modèle…</translation>
+      <translation>Enregistrer comme modèle…</translation>
     </message>
     <message>
       <source>Share to...</source>
@@ -81,7 +81,7 @@
     </message>
     <message>
       <source>Export Layout as...</source>
-      <translation>Exporter la mise en page au format…</translation>
+      <translation>Exporter</translation>
     </message>
     <message>
       <source>Reports cannot be exported from the panel: {names}</source>
@@ -220,14 +220,6 @@
       <translation>Impossible de lire le modèle « {path} »</translation>
     </message>
     <message>
-      <source>Remove Layouts Without Confirmation</source>
-      <translation>Supprimer les mises en page sans confirmation</translation>
-    </message>
-    <message>
-      <source>Copy Layout to Clipboard</source>
-      <translation>Copier la mise en page dans le presse-papiers</translation>
-    </message>
-    <message>
       <source>Choose Another Template File...</source>
       <translation>Choisir un autre fichier modèle…</translation>
     </message>
@@ -246,6 +238,37 @@
     <message>
       <source>Choose a template to create a new layout</source>
       <translation>Choisir un modèle pour créer une nouvelle mise en page</translation>
+    </message>
+  </context>
+  <context>
+    <name>LayoutPanelShortcuts</name>
+    <message>
+      <source>New Print Layout</source>
+      <translation>Nouvelle mise en page</translation>
+    </message>
+    <message>
+      <source>Open Layout</source>
+      <translation>Ouvrir la mise en page</translation>
+    </message>
+    <message>
+      <source>Rename Layout</source>
+      <translation>Renommer la mise en page</translation>
+    </message>
+    <message>
+      <source>Duplicate Layouts</source>
+      <translation>Dupliquer les mises en page</translation>
+    </message>
+    <message>
+      <source>Remove Layouts...</source>
+      <translation>Supprimer les mises en page…</translation>
+    </message>
+    <message>
+      <source>Remove Layouts Without Confirmation</source>
+      <translation>Supprimer les mises en page sans confirmation</translation>
+    </message>
+    <message>
+      <source>Copy Layout to Clipboard</source>
+      <translation>Copier la mise en page dans le presse-papiers</translation>
     </message>
   </context>
   <context>

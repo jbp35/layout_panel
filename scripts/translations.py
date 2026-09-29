@@ -36,7 +36,11 @@ def extract():
             if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                     and node.func.id in ('tr', 'trNoop') and node.args
                     and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
-                add(CONTEXT, node.args[0].value)
+                # optional context: second argument or context= keyword, as a string literal
+                context_node = node.args[1] if len(node.args) > 1 else next(
+                    (keyword.value for keyword in node.keywords if keyword.arg == 'context'), None)
+                context = context_node.value if isinstance(context_node, ast.Constant) else CONTEXT
+                add(context, node.args[0].value)
 
     for path in sorted(PLUGIN_DIR.rglob('*.ui')):
         ui = ET.parse(path).getroot()

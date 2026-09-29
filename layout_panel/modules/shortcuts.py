@@ -43,14 +43,14 @@ class PanelShortcuts(QObject):
 
     # (name, text, default shortcut, method of the panel called when triggered)
     SHORTCUTS = [
-        ('mActionLayoutPanelNewLayout', trNoop('New Print Layout'), 'Ctrl+N', 'newLayout'),
-        ('mActionLayoutPanelOpenLayout', trNoop('Open Layout'), 'Return', 'openLayout'),
-        ('mActionLayoutPanelRenameLayout', trNoop('Rename Layout'), 'F2', 'renameLayout'),
-        ('mActionLayoutPanelDuplicateLayout', trNoop('Duplicate Layouts'), 'Ctrl+D', 'duplicateLayouts'),
-        ('mActionLayoutPanelRemoveLayout', trNoop('Remove Layouts...'), 'Del', 'removeLayouts'),
-        ('mActionLayoutPanelRemoveLayoutNoConfirm', trNoop('Remove Layouts Without Confirmation'), 'Shift+Del',
+        ('mActionLayoutPanelNewLayout', trNoop('New Print Layout', 'LayoutPanelShortcuts'), 'Ctrl+N', 'newLayout'),
+        ('mActionLayoutPanelOpenLayout', trNoop('Open Layout', 'LayoutPanelShortcuts'), 'Return', 'openLayout'),
+        ('mActionLayoutPanelRenameLayout', trNoop('Rename Layout', 'LayoutPanelShortcuts'), 'F2', 'renameLayout'),
+        ('mActionLayoutPanelDuplicateLayout', trNoop('Duplicate Layouts', 'LayoutPanelShortcuts'), 'Ctrl+D', 'duplicateLayouts'),
+        ('mActionLayoutPanelRemoveLayout', trNoop('Remove Layouts...', 'LayoutPanelShortcuts'), 'Del', 'removeLayouts'),
+        ('mActionLayoutPanelRemoveLayoutNoConfirm', trNoop('Remove Layouts Without Confirmation', 'LayoutPanelShortcuts'), 'Shift+Del',
          'removeLayoutsWithoutConfirmation'),
-        ('mActionLayoutPanelCopyToClipboard', trNoop('Copy Layout to Clipboard'), 'Ctrl+C', 'copyToClipboard'),
+        ('mActionLayoutPanelCopyToClipboard', trNoop('Copy Layout to Clipboard', 'LayoutPanelShortcuts'), 'Ctrl+C', 'copyToClipboard'),
     ]
 
     def __init__(self, panel):
@@ -59,7 +59,7 @@ class PanelShortcuts(QObject):
         self.actions = []
         for name, text, default_shortcut, method in self.SHORTCUTS:
             # the action is not added to any widget, so QGIS never triggers it globally
-            action = QAction('Layout Panel: ' + tr(text), self)
+            action = QAction('Layout Panel: ' + tr(text, 'LayoutPanelShortcuts'), self)
             action.triggered.connect(getattr(panel, method))
             registerShortcut(action, name, default_shortcut)
             self.actions.append(action)

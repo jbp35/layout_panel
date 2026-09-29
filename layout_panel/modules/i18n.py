@@ -15,12 +15,16 @@ CONTEXT = 'LayoutPanel'
 I18N_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'i18n')
 
 
-def tr(text):
-    """Return the translation of a text of the plugin"""
-    return QCoreApplication.translate(CONTEXT, text)
+def tr(text, context=CONTEXT):
+    """Return the translation of a text of the plugin.
+
+    A different context lets the same English text get another translation,
+    e.g. a short menu entry and the longer name of its keyboard shortcut.
+    """
+    return QCoreApplication.translate(context, text)
 
 
-def trNoop(text):
+def trNoop(text, context=CONTEXT):
     """Mark a text for translation without translating it yet (translate it later with tr)"""
     return text
 

@@ -9,7 +9,7 @@
     </message>
     <message>
       <source>Export All Layouts as...</source>
-      <translation>Alle Layouts exportieren als…</translation>
+      <translation>Alle exportieren</translation>
     </message>
     <message>
       <source>Export as PDF</source>
@@ -37,31 +37,31 @@
     </message>
     <message>
       <source>Open Layout</source>
-      <translation>Layout öffnen</translation>
+      <translation>Öffnen</translation>
     </message>
     <message>
       <source>Duplicate Layout</source>
-      <translation>Layout duplizieren</translation>
+      <translation>Duplizieren</translation>
     </message>
     <message>
       <source>Rename Layout</source>
-      <translation>Layout umbenennen</translation>
+      <translation>Umbenennen</translation>
     </message>
     <message>
       <source>Remove Layout...</source>
-      <translation>Layout löschen…</translation>
+      <translation>Löschen…</translation>
     </message>
     <message>
       <source>Duplicate Layouts</source>
-      <translation>Layouts duplizieren</translation>
+      <translation>Duplizieren</translation>
     </message>
     <message>
       <source>Remove Layouts...</source>
-      <translation>Layouts löschen…</translation>
+      <translation>Löschen…</translation>
     </message>
     <message>
       <source>Export Layouts as...</source>
-      <translation>Layouts exportieren als…</translation>
+      <translation>Exportieren</translation>
     </message>
     <message>
       <source>Choose a file name to export the layout</source>
@@ -69,7 +69,7 @@
     </message>
     <message>
       <source>Save Layout as Template...</source>
-      <translation>Layout als Vorlage speichern…</translation>
+      <translation>Als Vorlage speichern…</translation>
     </message>
     <message>
       <source>Share to...</source>
@@ -81,7 +81,7 @@
     </message>
     <message>
       <source>Export Layout as...</source>
-      <translation>Layout exportieren als…</translation>
+      <translation>Exportieren</translation>
     </message>
     <message>
       <source>Reports cannot be exported from the panel: {names}</source>
@@ -220,14 +220,6 @@
       <translation>Vorlage „{path}“ konnte nicht gelesen werden</translation>
     </message>
     <message>
-      <source>Remove Layouts Without Confirmation</source>
-      <translation>Layouts ohne Bestätigung löschen</translation>
-    </message>
-    <message>
-      <source>Copy Layout to Clipboard</source>
-      <translation>Layout in die Zwischenablage kopieren</translation>
-    </message>
-    <message>
       <source>Choose Another Template File...</source>
       <translation>Andere Vorlagendatei wählen…</translation>
     </message>
@@ -246,6 +238,37 @@
     <message>
       <source>Choose a template to create a new layout</source>
       <translation>Vorlage für ein neues Layout wählen</translation>
+    </message>
+  </context>
+  <context>
+    <name>LayoutPanelShortcuts</name>
+    <message>
+      <source>New Print Layout</source>
+      <translation>Neues Drucklayout</translation>
+    </message>
+    <message>
+      <source>Open Layout</source>
+      <translation>Layout öffnen</translation>
+    </message>
+    <message>
+      <source>Rename Layout</source>
+      <translation>Layout umbenennen</translation>
+    </message>
+    <message>
+      <source>Duplicate Layouts</source>
+      <translation>Layouts duplizieren</translation>
+    </message>
+    <message>
+      <source>Remove Layouts...</source>
+      <translation>Layouts löschen…</translation>
+    </message>
+    <message>
+      <source>Remove Layouts Without Confirmation</source>
+      <translation>Layouts ohne Bestätigung löschen</translation>
+    </message>
+    <message>
+      <source>Copy Layout to Clipboard</source>
+      <translation>Layout in die Zwischenablage kopieren</translation>
     </message>
   </context>
   <context>
