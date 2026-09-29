@@ -20,6 +20,7 @@ changelog=
         * Groups can be created, renamed, removed and exported (subgroups are recreated as subfolders), with "Create Group..." and "Group Selected..." in the context menu
         * Drag and drop layouts and groups to move them to another group; renaming a layout to "Group/Name" moves it too
         * French, Spanish and German translations
+        * New basic layout templates from A4 to A0, portrait and landscape: a map using the whole page inside the margins, the project title, a scale bar and a north arrow. Their map opens on the current map canvas view
       1.0.0
         * New "Show Layout Map Extents" map tool: shows the extent of every layout map on the canvas with its layout name, click an extent to open its layout, drag its center handle to move it (undoable), right-click to leave the tool
         * Keyboard shortcuts can be changed in Settings > Keyboard Shortcuts: Ctrl+Alt+L show the panel, Ctrl+Alt+X layout extents tool, and in the layout list Ctrl+N new, Return open, F2 rename, Ctrl+D duplicate, Del remove, Shift+Del remove without confirmation, Ctrl+C copy to clipboard
