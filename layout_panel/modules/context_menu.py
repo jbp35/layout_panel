@@ -1,6 +1,7 @@
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QDir
 from qgis.core import QgsPrintLayout
+from .i18n import tr
 from .icons import icon
 
 IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'bmp', 'tif', 'tiff', 'webp', 'ppm', 'xpm', 'xbm', 'pbm', 'pgm']
@@ -31,41 +32,41 @@ class ContextMenu():
         
         # Context menu if no layout is selected
         if len(selectedLayouts) == 0: 
-            newLayoutAction = menu.addAction(icon('mActionNewLayout.svg'), "New Print Layout")
+            newLayoutAction = menu.addAction(icon('mActionNewLayout.svg'), tr("New Print Layout"))
             menu.addSeparator()
-            exportMenu = menu.addMenu("Export All Layouts as...")
-            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
-            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
-            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
+            exportMenu = menu.addMenu(tr("Export All Layouts as..."))
+            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
+            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), tr("Export as Image"))
+            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), tr("Export as SVG"))
                 
         # Context menu if only one layout is selected
         elif len(selectedLayouts) == 1:
-            openAction = menu.addAction(icon('mIconLayout.svg'), "Open Layout")
-            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'), "Duplicate Layout")
-            renameAction = menu.addAction(icon('mActionRename.svg'),"Rename Layout")
-            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'),"Remove Layout...")
+            openAction = menu.addAction(icon('mIconLayout.svg'), tr("Open Layout"))
+            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'), tr("Duplicate Layout"))
+            renameAction = menu.addAction(icon('mActionRename.svg'),tr("Rename Layout"))
+            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'),tr("Remove Layout..."))
             # Reports only support open, duplicate, rename and remove
             layout = self.parent.layout_item.layoutByName(selectedLayouts[0].text())
             if isinstance(layout, QgsPrintLayout):
                 menu.addSeparator()
-                saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), "Save Layout as Template...")
+                saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), tr("Save Layout as Template..."))
                 menu.addSeparator()
-                shareToMenu=menu.addMenu("Share to...")
-                copyToClipboardAction = shareToMenu.addAction( "Copy to clipboard")
-                exportMenu=menu.addMenu("Export Layout as...")
-                exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
-                exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
-                exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
+                shareToMenu=menu.addMenu(tr("Share to..."))
+                copyToClipboardAction = shareToMenu.addAction(tr("Copy to clipboard"))
+                exportMenu=menu.addMenu(tr("Export Layout as..."))
+                exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
+                exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), tr("Export as Image"))
+                exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), tr("Export as SVG"))
 
         # Context menu if multiple layouts are selected
         else:
-            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'),"Duplicate Layouts")
-            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), "Remove Layouts...")
+            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'),tr("Duplicate Layouts"))
+            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), tr("Remove Layouts..."))
             menu.addSeparator()
-            exportMenu = menu.addMenu("Export Layouts as...")
-            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
-            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
-            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'),"Export as SVG")
+            exportMenu = menu.addMenu(tr("Export Layouts as..."))
+            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
+            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), tr("Export as Image"))
+            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), tr("Export as SVG"))
         
         action = menu.exec(self.parent.listWidget.mapToGlobal(position))
         if action == None: return
@@ -105,16 +106,17 @@ class ContextMenu():
 
         if format == "PDF":
             default_extension = '.pdf'
-            extension_filter = 'PDF files (*.pdf *.PDF)'
-            default_filter = 'PDF files (*.pdf *.PDF)'
+            extension_filter = tr('PDF files') + ' (*.pdf *.PDF)'
+            default_filter = extension_filter
         elif format == "IMG":
             default_extension = '.png'
-            extension_filter = ';;'.join(f'{fmt.upper()} format (*.{fmt} *.{fmt.upper()})' for fmt in IMAGE_FORMATS)
-            default_filter = 'PNG format (*.png *.PNG)'
+            extension_filter = ';;'.join(tr('{format} format').format(format=fmt.upper()) + f' (*.{fmt} *.{fmt.upper()})'
+                                         for fmt in IMAGE_FORMATS)
+            default_filter = tr('{format} format').format(format='PNG') + ' (*.png *.PNG)'
         elif format == "SVG":
             default_extension = '.svg'
-            extension_filter = 'SVG format (*.svg *.SVG)'
-            default_filter = 'SVG format (*.svg *.SVG)'
+            extension_filter = tr('{format} format').format(format='SVG') + ' (*.svg *.SVG)'
+            default_filter = extension_filter
         else:
             return
 
@@ -135,13 +137,13 @@ class ContextMenu():
             else:
                 skipped.append(layout_name)
         if skipped:
-            self.parent.iface.messageBar().pushWarning('Export layout', 'Reports cannot be exported from the panel: ' + ', '.join(skipped))
+            self.parent.iface.messageBar().pushWarning(tr('Export layout'), tr('Reports cannot be exported from the panel: {names}').format(names=', '.join(skipped)))
         if not layouts:
             return
 
         # A single layout: ask for a file name
         if len(selected_items) == 1:
-            file_name = QtWidgets.QFileDialog.getSaveFileName(self.parent, 'Choose a file name to export the layout',
+            file_name = QtWidgets.QFileDialog.getSaveFileName(self.parent, tr('Choose a file name to export the layout'),
                                                               QDir(last_used_folder).filePath(layouts[0].name() + default_extension),
                                                               extension_filter, default_filter)[0]
             if file_name == '':
@@ -151,7 +153,7 @@ class ContextMenu():
 
         # Several layouts: ask for a destination folder
         else:
-            dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, 'Choose folder to save multiple files',
+            dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, tr('Choose folder to save multiple files'),
                                                                   last_used_folder, QtWidgets.QFileDialog.Option.ShowDirsOnly)
             if dir_name == '':
                 return

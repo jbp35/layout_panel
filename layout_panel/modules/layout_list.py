@@ -3,6 +3,7 @@ import math
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsApplication, QgsPrintLayout, QgsProject, QgsUnitTypes
+from .i18n import tr
 from .icons import icon
 from .signal_relay import SignalRelay
 
@@ -50,7 +51,7 @@ class LayoutList():
                 item.setToolTip(self.layoutToolTip(layout))
             else:
                 item.setIcon(QgsApplication.getThemeIcon('/mIconReport.svg'))
-                item.setToolTip('Report')
+                item.setToolTip(tr('Report'))
             self.parent.listWidget.addItem(item)
         
         #Disable delete button if there are no layouts in the list
@@ -71,15 +72,17 @@ class LayoutList():
             units = QgsUnitTypes.encodeUnit(layout.units())
             page_size_text = f'{page_size.width()}x{page_size.height()} {units}'
         else:
-            page_size_text = 'variable'
+            page_size_text = tr('variable')
 
         # The scale is NaN or infinite when the map has an empty extent
-        map_scale = 'Unknown'
+        map_scale = tr('Unknown')
         reference_map = layout.referenceMap()
         if reference_map and math.isfinite(reference_map.scale()):
             map_scale = f'1:{round(reference_map.scale())}'
 
-        return f'Page Count: {page_count} <br> Page Size: {page_size_text} <br> Map Scale: {map_scale}'
+        return ' <br> '.join([tr('Page Count: {count}').format(count=page_count),
+                             tr('Page Size: {size}').format(size=page_size_text),
+                             tr('Map Scale: {scale}').format(scale=map_scale)])
 
             
     def duplicateSelectedLayouts(self):
@@ -102,11 +105,11 @@ class LayoutList():
             if len(selected_items) == 0:
                 return
             elif len(selected_items) == 1:
-                ret = qm.question(self.parent, 'Remove Selected Layout',
-                                f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.StandardButton.Yes | qm.StandardButton.No)
+                ret = qm.question(self.parent, tr('Remove Selected Layout'),
+                                tr('Are you sure you want to remove permanently "{name}" ?').format(name=selected_items[0].text()), qm.StandardButton.Yes | qm.StandardButton.No)
             else:
-                ret = qm.question(self.parent, 'Remove Selected Layouts',
-                                f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.StandardButton.Yes | qm.StandardButton.No)
+                ret = qm.question(self.parent, tr('Remove Selected Layouts'),
+                                tr('Are you sure you want to remove permanently {count} layouts?').format(count=len(selected_items)), qm.StandardButton.Yes | qm.StandardButton.No)
         
             if ret == qm.StandardButton.No:
                 return

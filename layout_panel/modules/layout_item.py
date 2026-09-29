@@ -1,6 +1,7 @@
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt, QUrl, QDir, QFileInfo
 from qgis.core import QgsLayoutExporter, QgsReadWriteContext
+from .i18n import tr
 
 class LayoutItem():
     def __init__(self,parent=None):
@@ -34,7 +35,7 @@ class LayoutItem():
         
         iterator = 1
         while True:
-            duplicate_layout_name = layout_name + ' copy ' + str(iterator)
+            duplicate_layout_name = tr('{name} copy {number}').format(name=layout_name, number=iterator)
             if layout_manager.layoutByName(duplicate_layout_name) is None:
                 layout = layout_manager.layoutByName(layout_name)
                 layout_manager.duplicateLayout(layout, duplicate_layout_name)
@@ -63,7 +64,7 @@ class LayoutItem():
         if layout and new_name and self.layoutByName(new_name) is None:
             layout.setName(new_name)
         else:
-            self.parent.iface.messageBar().pushWarning('Failed to rename layout', ' Entered layout name already exists or is invalid.')
+            self.parent.iface.messageBar().pushWarning(tr('Failed to rename layout'), ' ' + tr('Entered layout name already exists or is invalid.'))
         self.parent.layout_list.updateLayoutList()
        
         
@@ -80,14 +81,14 @@ class LayoutItem():
         if current_layout is None:
             return
         template_dir = QDir(self.parent.project.getDefaultTemplateFolderPath())
-        file_path = QtWidgets.QFileDialog.getSaveFileName(self.parent, 'Choose a file name to save the layout as template',
+        file_path = QtWidgets.QFileDialog.getSaveFileName(self.parent, tr('Choose a file name to save the layout as template'),
                                                       template_dir.filePath(current_layout.name() + '.qpt'),
-                                                      'Layout templates (*.qpt *.QPT)')[0]
+                                                      tr('Layout templates') + ' (*.qpt *.QPT)')[0]
         if file_path != '':
             template=current_layout.saveAsTemplate(file_path, QgsReadWriteContext())
             if template:
                 href = f'<a href="{QUrl.fromLocalFile(file_path).toString()}">{QDir.toNativeSeparators(file_path)}</a>'
-                self.parent.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
+                self.parent.iface.messageBar().pushSuccess(tr('Save as Template'), ' ' + tr('Successfully saved layout template to {path}').format(path=href))
 
        
     def exportLayouts(self, jobs, format):
@@ -99,8 +100,8 @@ class LayoutItem():
         :param jobs: list of (layout, file_name) tuples
         :param format: "PDF", "IMG" or "SVG"
         """
-        progress = QtWidgets.QProgressDialog('Exporting layouts...', 'Cancel', 0, len(jobs), self.parent)
-        progress.setWindowTitle('Export layout')
+        progress = QtWidgets.QProgressDialog(tr('Exporting layouts...'), tr('Cancel'), 0, len(jobs), self.parent)
+        progress.setWindowTitle(tr('Export layout'))
         progress.setWindowModality(Qt.WindowModality.WindowModal)
         progress.setMinimumDuration(500)
 
@@ -109,7 +110,7 @@ class LayoutItem():
         for index, (layout, file_name) in enumerate(jobs):
             if progress.wasCanceled():
                 break
-            progress.setLabelText(f'Exporting "{layout.name()}"...')
+            progress.setLabelText(tr('Exporting "{name}"...').format(name=layout.name()))
             progress.setValue(index)
 
             exporter = QgsLayoutExporter(layout)
@@ -128,21 +129,22 @@ class LayoutItem():
 
         message_bar = self.parent.iface.messageBar()
         if errors:
-            message_bar.pushCritical('Export layout', 'Failed to export ' + '; '.join(errors))
+            message_bar.pushCritical(tr('Export layout'), tr('Failed to export {errors}').format(errors='; '.join(errors)))
         if len(exported) == 1:
             href = f'<a href="{QUrl.fromLocalFile(exported[0]).toString()}">{QDir.toNativeSeparators(exported[0])}</a>'
-            message_bar.pushSuccess('Export layout', ' Successfully exported layout to ' + href)
+            message_bar.pushSuccess(tr('Export layout'), ' ' + tr('Successfully exported layout to {path}').format(path=href))
         elif exported:
             folder = QFileInfo(exported[0]).absolutePath()
             href = f'<a href="{QUrl.fromLocalFile(folder).toString()}">{QDir.toNativeSeparators(folder)}</a>'
-            message_bar.pushSuccess('Export layout', f' Successfully exported {len(exported)} layouts to ' + href)
+            message_bar.pushSuccess(tr('Export layout'), ' ' + tr('Successfully exported {count} layouts to {path}').format(
+                count=len(exported), path=href))
 
 
     def copyToClipboard(self, layout):
         """Copy the first page of the layout to the clipboard as an image"""
         image = QgsLayoutExporter(layout).renderPageToImage(0)
         if image.isNull():
-            self.parent.iface.messageBar().pushWarning('Copy layout', f' Failed to copy "{layout.name()}" to clipboard')
+            self.parent.iface.messageBar().pushWarning(tr('Copy layout'), ' ' + tr('Failed to copy "{name}" to clipboard').format(name=layout.name()))
             return
         QtWidgets.QApplication.clipboard().setImage(image)
-        self.parent.iface.messageBar().pushSuccess('Copy layout', f' Successfully copied "{layout.name()}" to clipboard')
+        self.parent.iface.messageBar().pushSuccess(tr('Copy layout'), ' ' + tr('Successfully copied "{name}" to clipboard').format(name=layout.name()))

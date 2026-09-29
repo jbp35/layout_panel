@@ -1,6 +1,7 @@
 from qgis.PyQt.QtCore import QDir, QFileInfo, QSettings
 from qgis.core import QgsApplication, QgsProject, QgsPrintLayout, QgsSettings, QgsReadWriteContext
 from qgis.PyQt import QtXml
+from .i18n import tr
 
 class Project():
     def __init__(self,plugin_dir,parent=None):
@@ -82,8 +83,8 @@ class Project():
         """Create a new blank layout"""
         iterator = 1
         while True:
-            if self.project_layout_manager.layoutByName('Layout ' + str(iterator)) is None:
-                layout_name = "Layout " + str(iterator)
+            layout_name = tr('Layout {number}').format(number=iterator)
+            if self.project_layout_manager.layoutByName(layout_name) is None:
                 layout = QgsPrintLayout(self.project_instance)
                 layout.initializeDefaults()
                 layout.setName(layout_name)
@@ -99,7 +100,7 @@ class Project():
         with open(layout_template_path, 'rb') as file:
             content = file.read()
         if not document.setContent(content):
-            self.parent.iface.messageBar().pushWarning('New layout from template', f' Could not read template "{layout_template_path}"')
+            self.parent.iface.messageBar().pushWarning(tr('New layout from template'), ' ' + tr('Could not read template "{path}"').format(path=layout_template_path))
             return
         template_name = QFileInfo(layout_template_path).baseName()
         iterator = 1

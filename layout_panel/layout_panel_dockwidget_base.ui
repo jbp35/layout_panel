@@ -50,7 +50,7 @@
          <string>Create Layout</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
@@ -66,7 +66,7 @@
          <string>Create Layout from Template</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="popupMode">
          <enum>QToolButton::InstantPopup</enum>
@@ -82,7 +82,7 @@
          <string>Remove Layout</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
@@ -95,7 +95,7 @@
          <string>Show Layout Map Extents (click an extent to open its layout, drag its center to move it, right-click to exit)</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
