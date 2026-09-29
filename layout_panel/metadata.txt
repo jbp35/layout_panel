@@ -1,26 +1,31 @@
-# This file contains metadata for your plugin.
-
-# This file should be included when you package your plugin.# Mandatory items:
-
 [general]
 name=Layout Panel
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
-description=Upgrade to Qgis 4.x
-version=0.4
+supportsQt6=True
+description=Manage print layouts from a panel in the QGIS main window
+version=0.5
 author=Atelier JBP
 email=jbpeter@outlook.com
 
 about=This plugin adds a new panel to manage print layouts directly from QGIS main window. It allows to quickly open, create, rename, delete and filter print layouts without having to open the layout manager. It supports layout templates and also makes it possible to batch export one or multiple layouts to PDF, Image or SVG formats without having to open each print layout.
 tracker=https://github.com/jbp35/layout_panel/issues
 repository=https://github.com/jbp35/layout_panel
-# End of mandatory metadata
-
-# Recommended items:
+homepage=https://github.com/jbp35/layout_panel
 
 hasProcessingProvider=no
-# Uncomment the following line and add your changelog:
 changelog=
+      0.5
+        * Fixed crashes when exporting layouts as image or with text annotations (#3, #4)
+        * Reports are listed in the panel instead of raising errors (#5)
+        * Fixed error when a map has an empty extent (#6)
+        * Fixed "Save Layout as Template" error
+        * The panel is removed properly when the plugin is unloaded or reloaded
+        * Filter matches layout names literally (special characters no longer break it)
+        * Duplicate layouts shortcut is now Ctrl+D
+        * Removed unused files; only the layout_panel folder is shipped
+      0.4
+        * Support for QGIS 4 (Qt6)
       0.3
         * Reload the panel automatically at QGIS startup
         * Copy first page of the layout directly to the clipboard
@@ -32,27 +37,9 @@ changelog=
         * Added changelog
         * Refactored the code into modules
 
-
-# Tags are comma separated with spaces allowed
 tags=Layout, manager, panel, print, composition, batch, export, template
-
-homepage=https://github.com/jbp35/layout_panel
 category=Plugins
 icon=icon.png
-# experimental flag
 experimental=False
-
-# deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
-
-# Since QGIS 3.8, a comma separated list of plugins to be installed
-# (or upgraded) can be specified.
-# Check the documentation for more information.
-# plugin_dependencies=
-
-Category of the plugin: Raster, Vector, Database or Web
-# category=
-
-# If the plugin can run on QGIS Server.
 server=False
-

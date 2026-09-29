@@ -1,5 +1,5 @@
-from qgis.PyQt.QtCore import QDir, QFileInfo,  QSettings
-from qgis.core import QgsApplication, QgsProject, QgsPrintLayout,QgsSettings,QgsReadWriteContext
+from qgis.PyQt.QtCore import QDir, QFileInfo, QSettings
+from qgis.core import QgsApplication, QgsProject, QgsPrintLayout, QgsSettings, QgsReadWriteContext
 from qgis.PyQt import QtXml
 
 class Project():
@@ -15,8 +15,14 @@ class Project():
         QgsProject.instance().cleared.connect(self.updateProjectInstance)
         
         self.updateProjectInstance()
-        
-        
+
+
+    def cleanup(self):
+        """Disconnect from QGIS signals when the plugin is unloaded"""
+        QgsProject.instance().readProject.disconnect(self.updateProjectInstance)
+        QgsProject.instance().cleared.disconnect(self.updateProjectInstance)
+
+
     def updateProjectInstance(self):
         """Update project instance and project layout manager"""
         self.parent.mLineEdit.clearValue()
@@ -24,7 +30,7 @@ class Project():
         self.project_layout_manager = self.project_instance.layoutManager()
         
         last_layout_export_dir = QgsSettings().value('APP/lastLayoutExportDir')
-        if last_layout_export_dir == "":
+        if not last_layout_export_dir:
             self.last_used_folder = QDir(self.project_instance.homePath()).absolutePath()
         else:
             self.last_used_folder = QFileInfo(last_layout_export_dir).dir().absolutePath()
@@ -33,11 +39,6 @@ class Project():
     def getLayoutManager(self):
         """Return currrent layout manager"""
         return self.project_layout_manager
-    
-    
-    def getProjectInstance(self):
-        """Return current project instance"""
-        return self.project_instance
     
     
     def getLastUsedFolder(self):
@@ -62,7 +63,7 @@ class Project():
         searchPathsForTemplates.append(self.getDefaultTemplateFolderPath())
         
         #add layout panel template folder
-        searchPathsForTemplates.append(self.plugin_dir + '/templates')
+        searchPathsForTemplates.append(QDir(self.plugin_dir).filePath('templates'))
       
         #add additional paths
         additional_path_list=QSettings().value("core/Layout/searchPathsForTemplates")
@@ -75,8 +76,7 @@ class Project():
     
     def getDefaultTemplateFolderPath(self):
         """return default folder for layout templates"""
-        return QgsApplication.qgisSettingsDirPath()+'composer_templates'
-        #TODO: Fix path if current user is not default
+        return QDir(QgsApplication.qgisSettingsDirPath()).filePath('composer_templates')
         
     def createNewLayout(self):
         """Create a new blank layout"""
@@ -84,7 +84,7 @@ class Project():
         while True:
             if self.project_layout_manager.layoutByName('Layout ' + str(iterator)) is None:
                 layout_name = "Layout " + str(iterator)
-                layout = QgsPrintLayout(self.parent.project.getProjectInstance())
+                layout = QgsPrintLayout(self.project_instance)
                 layout.initializeDefaults()
                 layout.setName(layout_name)
                 self.project_layout_manager.addLayout(layout)
@@ -94,10 +94,13 @@ class Project():
 
     def createLayoutFromTemplate(self, layout_template_path):
         """Create a new layout based on a template file"""
+        # Read raw bytes so the XML declaration decides the encoding
         document = QtXml.QDomDocument()
-        with open(layout_template_path) as file:
+        with open(layout_template_path, 'rb') as file:
             content = file.read()
-        document.setContent(content)
+        if not document.setContent(content):
+            self.parent.iface.messageBar().pushWarning('New layout from template', f' Could not read template "{layout_template_path}"')
+            return
         template_name = QFileInfo(layout_template_path).baseName()
         iterator = 1
         while True:

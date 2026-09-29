@@ -1,6 +1,6 @@
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt, QUrl, QDir, QFileInfo
-from qgis.core import QgsLayoutExporter, QgsReadWriteContext, QgsApplication
+from qgis.core import QgsLayoutExporter, QgsReadWriteContext
 
 class LayoutItem():
     def __init__(self,parent=None):
@@ -15,11 +15,18 @@ class LayoutItem():
         """Return the layout (print layout or report) with this name"""
         return self.parent.project.getLayoutManager().layoutByName(layout_name)
         
+    def currentLayout(self):
+        """Return the first selected layout, or None if nothing is selected"""
+        selected_items = self.parent.listWidget.selectedItems()
+        if not selected_items:
+            return None
+        return self.layoutByName(selected_items[0].text())
+
     def openCurrentLayout(self):
         """Open currently selected layout in editor"""
-        layout_manager= self.parent.project.getLayoutManager()
-        layout = layout_manager.layoutByName(self.parent.listWidget.selectedItems()[0].text())
-        self.parent.iface.openLayoutDesigner(layout)
+        layout = self.currentLayout()
+        if layout:
+            self.parent.iface.openLayoutDesigner(layout)
     
     def duplicateLayout(self, layout_name):
         """Duplicate the layout"""
@@ -37,36 +44,42 @@ class LayoutItem():
 
     def renameLayout(self):
         """Open editor mode to rename currently selected layout"""
-        self.name_before_rename = self.parent.listWidget.selectedItems()[0].text()
-        self.parent.listWidget.editItem(self.parent.listWidget.selectedItems()[0])
+        selected_items = self.parent.listWidget.selectedItems()
+        if not selected_items:
+            return
+        self.name_before_rename = selected_items[0].text()
+        self.parent.listWidget.editItem(selected_items[0])
 
 
-    def renameLayoutClosedEditor(self, QListWidgetItem):
+    def renameLayoutClosedEditor(self, editor):
         """Called when editor mode is closed to rename the layout"""
-        layout_manager= self.parent.project.getLayoutManager()
-        if layout_manager.layoutByName(QListWidgetItem.text()) is None and QListWidgetItem.text() != "":
-            if self.name_before_rename != QListWidgetItem.text():
-                layout = layout_manager.layoutByName(self.name_before_rename)
-                layout.setName(QListWidgetItem.text())
+        old_name = self.name_before_rename
+        self.name_before_rename = None
+        new_name = editor.text().strip()
+        if old_name is None or new_name == old_name:
+            return
+
+        layout = self.layoutByName(old_name)
+        if layout and new_name and self.layoutByName(new_name) is None:
+            layout.setName(new_name)
         else:
-            if self.name_before_rename != QListWidgetItem.text():
-                self.parent.iface.messageBar().pushWarning('Failed to rename layout', ' Entered layout name already exists or is invalid.')
+            self.parent.iface.messageBar().pushWarning('Failed to rename layout', ' Entered layout name already exists or is invalid.')
         self.parent.layout_list.updateLayoutList()
        
         
     def removeLayout(self, layout_name):
         """Remove the layout"""
-        layout_manager= self.parent.project.getLayoutManager()
-        layout_manager.removeLayout(layout_manager.layoutByName(layout_name))
+        layout = self.layoutByName(layout_name)
+        if layout:
+            self.parent.project.getLayoutManager().removeLayout(layout)
         
         
     def saveAsTemplate(self):
         """Save selected layout as template"""
-        layout_manager= self.parent.project.getLayoutManager()
-        selected_items = self.parent.listWidget.selectedItems()
-        template_dir = QDir(QgsApplication.qgisSettingsDirPath() + '/composer_templates')
-
-        current_layout = layout_manager.layoutByName(selected_items[0].text())
+        current_layout = self.currentLayout()
+        if current_layout is None:
+            return
+        template_dir = QDir(self.parent.project.getDefaultTemplateFolderPath())
         file_path = QtWidgets.QFileDialog.getSaveFileName(self.parent, 'Choose a file name to save the layout as template',
                                                       template_dir.filePath(current_layout.name() + '.qpt'),
                                                       'Layout templates (*.qpt *.QPT)')[0]
@@ -74,7 +87,7 @@ class LayoutItem():
             template=current_layout.saveAsTemplate(file_path, QgsReadWriteContext())
             if template:
                 href = f'<a href="{QUrl.fromLocalFile(file_path).toString()}">{QDir.toNativeSeparators(file_path)}</a>'
-                self.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
+                self.parent.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
 
        
     def exportLayouts(self, jobs, format):
@@ -110,7 +123,7 @@ class LayoutItem():
             if result == QgsLayoutExporter.ExportResult.Success:
                 exported.append(file_name)
             else:
-                errors.append(f'"{layout.name()}": {exporter.errorMessage() or result.name}')
+                errors.append(f'"{layout.name()}": {exporter.errorMessage() or getattr(result, "name", result)}')
         progress.setValue(len(jobs))
 
         message_bar = self.parent.iface.messageBar()

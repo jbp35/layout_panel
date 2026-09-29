@@ -25,7 +25,7 @@
 import os
 
 from qgis.PyQt import QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal, Qt, QEvent
+from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QAbstractItemView
 
 from .modules.icons import icon
@@ -41,8 +41,6 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
-
-    closingPlugin = pyqtSignal()
 
     def __init__(self, iface, parent=None):
         """Initialize the layout panel"""
@@ -77,38 +75,32 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.layout_item.renameLayoutClosedEditor)
         self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutList)
+        self.listWidget.itemSelectionChanged.connect(self.rubber_band.clear)
 
-    
-    # Manage keyboard shortcuts       
+
     def keyPressEvent(self, event):
-         if (event.type() == QEvent.Type.KeyPress):
-            key = event.key()
-            modifier = event.modifiers()
+        """Keyboard shortcuts: F2 rename, Enter open, Delete remove
+        (Shift+Delete without confirmation), Ctrl+D duplicate"""
+        key = event.key()
+        modifiers = event.modifiers()
 
-            if key == Qt.Key.Key_F2:
-                self.layout_item.renameLayout()
-                event.accept()
-                
-            if (key == Qt.Key.Key_Enter) or (key == Qt.Key.Key_Return):
-                self.layout_item.openCurrentLayout()
-                event.accept()
-                
-            if ( modifier != Qt.KeyboardModifier.ShiftModifier) and key == Qt.Key.Key_Delete:
-                self.layout_list.removeSelectedLayouts()
-                event.accept()
-                
-            if ( modifier == Qt.KeyboardModifier.ShiftModifier) and key == Qt.Key.Key_Delete:
-                self.layout_list.removeSelectedLayouts(False)
-                event.accept()
-                
-            if ( modifier == Qt.KeyboardModifier.ControlModifier) and key == Qt.Key.Key_C:
-                self.layout_list.duplicateSelectedLayouts()
-                event.accept()
-    
-    
-    def closeEvent(self, event):
-        """Close the plugin"""
-        self.closingPlugin.emit()
+        if key == Qt.Key.Key_F2:
+            self.layout_item.renameLayout()
+        elif key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
+            self.layout_item.openCurrentLayout()
+        elif key == Qt.Key.Key_Delete:
+            ask_confirmation = not (modifiers & Qt.KeyboardModifier.ShiftModifier)
+            self.layout_list.removeSelectedLayouts(ask_confirmation)
+        elif key == Qt.Key.Key_D and modifiers & Qt.KeyboardModifier.ControlModifier:
+            self.layout_list.duplicateSelectedLayouts()
+        else:
+            super().keyPressEvent(event)
+            return
         event.accept()
-            
-    
+
+
+    def cleanup(self):
+        """Disconnect from QGIS signals and remove canvas items when the plugin is unloaded"""
+        self.project.cleanup()
+        self.layout_list.cleanup()
+        self.rubber_band.cleanup()

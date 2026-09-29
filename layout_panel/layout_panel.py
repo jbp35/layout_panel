@@ -35,7 +35,6 @@ class LayoutPanel:
     def __init__(self, iface):
         self.iface = iface
         self.action = None
-        self.pluginIsActive = False
         self.dockwidget = None
 
     def initGui(self):
@@ -49,20 +48,22 @@ class LayoutPanel:
         if self.dockwidget is None:
             self.dockwidget = LayoutPanelDockWidget(self.iface, self.iface.mainWindow())
 
-        self.dockwidget.closingPlugin.connect(self.onClosePlugin)
         self.iface.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockwidget)
 
-    def onClosePlugin(self):
-        """Called when the dock widget is closed"""
-        self.pluginIsActive = False
-
     def unload(self):
-        """Remove the plugin menu item and icon from QGIS GUI."""
+        """Remove the plugin menu item, icon and dock widget from QGIS GUI."""
         self.iface.removePluginMenu(MENU_NAME, self.action)
         self.iface.removeToolBarIcon(self.action)
+        self.action.deleteLater()
+        self.action = None
+
+        if self.dockwidget is not None:
+            self.dockwidget.cleanup()
+            self.iface.removeDockWidget(self.dockwidget)
+            self.dockwidget.deleteLater()
+            self.dockwidget = None
 
     def run(self):
         """Show the dock widget"""
-        if not self.pluginIsActive:
-            self.pluginIsActive = True
-            self.dockwidget.show()
+        self.dockwidget.show()
+        self.dockwidget.raise_()

@@ -14,9 +14,24 @@ class RubberBand():
         self.rubber_band.setWidth(2)
 
     def drawExtent(self):
-        layout_manager=self.parent.project.getLayoutManager()
-        layout = layout_manager.layoutByName(self.parent.listWidget.selectedItems()[0].text())
-        reference_map=layout.referenceMap()
-        extent=reference_map.visibleExtentPolygon()
-        geom = QgsGeometry.fromQPolygonF(extent)
-        self.rubber_band.setToGeometry(geom)
+        """Show the extent of the selected layout's reference map on the canvas"""
+        selected_items = self.parent.listWidget.selectedItems()
+        if not selected_items:
+            return
+        layout = self.parent.layout_item.layoutByName(selected_items[0].text())
+        reference_map = layout.referenceMap() if layout else None
+        if reference_map is None:
+            self.parent.iface.messageBar().pushWarning('Show layout extent', f' "{selected_items[0].text()}" has no map')
+            return
+        # The polygon is in the map item's CRS; the rubber band reprojects it to the canvas CRS
+        geom = QgsGeometry.fromQPolygonF(reference_map.visibleExtentPolygon())
+        self.rubber_band.setToGeometry(geom, reference_map.crs())
+
+    def clear(self):
+        """Hide the extent"""
+        self.rubber_band.reset(QgsWkbTypes.PolygonGeometry)
+
+    def cleanup(self):
+        """Remove the rubber band from the canvas when the plugin is unloaded"""
+        self.clear()
+        self.parent.iface.mapCanvas().scene().removeItem(self.rubber_band)

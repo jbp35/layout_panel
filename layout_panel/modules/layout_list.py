@@ -1,7 +1,6 @@
 import math
-import re
 
-from qgis.PyQt import QtWidgets
+from qgis.PyQt import QtWidgets, sip
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsApplication, QgsPrintLayout, QgsProject, QgsUnitTypes
 from .icons import icon
@@ -10,31 +9,48 @@ class LayoutList():
     def __init__(self,parent=None):
         """Initialize the layout list"""
         self.parent = parent
-        self.layout_list = None
-        
-        QgsProject.instance().layoutManager().layoutAdded.connect(self.updateLayoutList)
-        QgsProject.instance().layoutManager().layoutRemoved.connect(self.updateLayoutList)
-        QgsProject.instance().layoutManager().layoutRenamed.connect(self.updateLayoutList)
-        
+        # Page collections whose changed signal is connected, to connect each only once
+        self.watched_page_collections = []
+
+        layout_manager = QgsProject.instance().layoutManager()
+        layout_manager.layoutAdded.connect(self.updateLayoutList)
+        layout_manager.layoutRemoved.connect(self.updateLayoutList)
+        layout_manager.layoutRenamed.connect(self.updateLayoutList)
+
         self.updateLayoutList()
+
+
+    def cleanup(self):
+        """Disconnect from QGIS signals when the plugin is unloaded"""
+        layout_manager = QgsProject.instance().layoutManager()
+        layout_manager.layoutAdded.disconnect(self.updateLayoutList)
+        layout_manager.layoutRemoved.disconnect(self.updateLayoutList)
+        layout_manager.layoutRenamed.disconnect(self.updateLayoutList)
+        for page_collection in self.watched_page_collections:
+            try:
+                page_collection.changed.disconnect(self.updateLayoutList)
+            except (RuntimeError, TypeError):
+                # the layout has been deleted in the meantime
+                pass
+        self.watched_page_collections = []
        
         
     def updateLayoutList(self):
         """Generate the list of layouts"""
         self.parent.listWidget.clear()
         layout_manager=self.parent.project.getLayoutManager()
-        self.layout_list = layout_manager.layouts()
-        search_value = self.parent.mLineEdit.value().replace("*", r"\*").replace("+", r"\+").replace("(", r"\(")\
-            .replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
-        
-        for layout in self.layout_list:
+        layouts = layout_manager.layouts()
+        # forget page collections of layouts deleted since the last refresh
+        self.watched_page_collections = [page_collection for page_collection in self.watched_page_collections
+                                         if not sip.isdeleted(page_collection)]
+        search_value = self.parent.mLineEdit.value().lower()
+
+        for layout in layouts:
             # Reports (QgsReport) have no page collection of their own
             is_print_layout = isinstance(layout, QgsPrintLayout)
             if is_print_layout:
-                # necessary to ensure that tooltips are updated when layout format or page count changes
-                layout.pageCollection().changed.connect(self.updateLayoutList)
-            match = bool(re.search(search_value, layout.name(), re.IGNORECASE))
-            if not match:
+                self.watchPageCollection(layout.pageCollection())
+            if search_value not in layout.name().lower():
                 continue
 
             item = QtWidgets.QListWidgetItem()
@@ -49,10 +65,18 @@ class LayoutList():
             self.parent.listWidget.addItem(item)
         
         #Disable delete button if there are no layouts in the list
-        if len(self.layout_list) == 0:
+        if len(layouts) == 0:
             self.parent.pbDeleteLayout.setEnabled(False)
         else:
             self.parent.pbDeleteLayout.setEnabled(True)
+
+
+    def watchPageCollection(self, page_collection):
+        """Refresh the list when page count or size changes, to keep tooltips up to date"""
+        if any(page_collection is watched for watched in self.watched_page_collections):
+            return
+        page_collection.changed.connect(self.updateLayoutList)
+        self.watched_page_collections.append(page_collection)
 
 
     @staticmethod
