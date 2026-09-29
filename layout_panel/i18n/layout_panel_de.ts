@@ -36,6 +36,22 @@
       <translation>Ordner zum Speichern der Dateien wählen</translation>
     </message>
     <message>
+      <source>Rename Folder</source>
+      <translation>Umbenennen</translation>
+    </message>
+    <message>
+      <source>Remove Folder...</source>
+      <translation>Löschen…</translation>
+    </message>
+    <message>
+      <source>Export Folder as...</source>
+      <translation>Exportieren</translation>
+    </message>
+    <message>
+      <source>Choose a file name to export the layout</source>
+      <translation>Dateinamen für den Layoutexport wählen</translation>
+    </message>
+    <message>
       <source>Open Layout</source>
       <translation>Öffnen</translation>
     </message>
@@ -64,8 +80,8 @@
       <translation>Exportieren</translation>
     </message>
     <message>
-      <source>Choose a file name to export the layout</source>
-      <translation>Dateinamen für den Layoutexport wählen</translation>
+      <source>Reports cannot be exported from the panel: {names}</source>
+      <translation>Berichte können nicht aus dem Bedienfeld exportiert werden: {names}</translation>
     </message>
     <message>
       <source>Save Layout as Template...</source>
@@ -82,10 +98,6 @@
     <message>
       <source>Export Layout as...</source>
       <translation>Exportieren</translation>
-    </message>
-    <message>
-      <source>Reports cannot be exported from the panel: {names}</source>
-      <translation>Berichte können nicht aus dem Bedienfeld exportiert werden: {names}</translation>
     </message>
     <message>
       <source>{format} format</source>
@@ -168,6 +180,14 @@
       <translation>Bericht</translation>
     </message>
     <message>
+      <source>Remove Folder</source>
+      <translation>Ordner löschen</translation>
+    </message>
+    <message>
+      <source>Layout Count: {count}</source>
+      <translation>Anzahl der Layouts: {count}</translation>
+    </message>
+    <message>
       <source>Page Count: {count}</source>
       <translation>Seitenanzahl: {count}</translation>
     </message>
@@ -186,6 +206,10 @@
     <message>
       <source>Remove Selected Layouts</source>
       <translation>Ausgewählte Layouts löschen</translation>
+    </message>
+    <message>
+      <source>Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?</source>
+      <translation>Möchten Sie den Ordner „{name}“ und seine {count} Layouts wirklich endgültig löschen?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

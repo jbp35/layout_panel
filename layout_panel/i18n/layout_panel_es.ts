@@ -36,6 +36,22 @@
       <translation>Elegir la carpeta donde guardar los archivos</translation>
     </message>
     <message>
+      <source>Rename Folder</source>
+      <translation>Renombrar</translation>
+    </message>
+    <message>
+      <source>Remove Folder...</source>
+      <translation>Eliminar…</translation>
+    </message>
+    <message>
+      <source>Export Folder as...</source>
+      <translation>Exportar</translation>
+    </message>
+    <message>
+      <source>Choose a file name to export the layout</source>
+      <translation>Elegir un nombre de archivo para exportar el diseño</translation>
+    </message>
+    <message>
       <source>Open Layout</source>
       <translation>Abrir</translation>
     </message>
@@ -64,8 +80,8 @@
       <translation>Exportar</translation>
     </message>
     <message>
-      <source>Choose a file name to export the layout</source>
-      <translation>Elegir un nombre de archivo para exportar el diseño</translation>
+      <source>Reports cannot be exported from the panel: {names}</source>
+      <translation>Los informes no se pueden exportar desde el panel: {names}</translation>
     </message>
     <message>
       <source>Save Layout as Template...</source>
@@ -82,10 +98,6 @@
     <message>
       <source>Export Layout as...</source>
       <translation>Exportar</translation>
-    </message>
-    <message>
-      <source>Reports cannot be exported from the panel: {names}</source>
-      <translation>Los informes no se pueden exportar desde el panel: {names}</translation>
     </message>
     <message>
       <source>{format} format</source>
@@ -168,6 +180,14 @@
       <translation>Informe</translation>
     </message>
     <message>
+      <source>Remove Folder</source>
+      <translation>Eliminar la carpeta</translation>
+    </message>
+    <message>
+      <source>Layout Count: {count}</source>
+      <translation>Número de diseños: {count}</translation>
+    </message>
+    <message>
       <source>Page Count: {count}</source>
       <translation>Número de páginas: {count}</translation>
     </message>
@@ -186,6 +206,10 @@
     <message>
       <source>Remove Selected Layouts</source>
       <translation>Eliminar los diseños seleccionados</translation>
+    </message>
+    <message>
+      <source>Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?</source>
+      <translation>¿Seguro que desea eliminar permanentemente la carpeta «{name}» y sus {count} diseños?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

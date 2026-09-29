@@ -72,7 +72,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Set connections        
         self.pbCreateLayout.clicked.connect(self.project.createNewLayout)
         self.pbDeleteLayout.clicked.connect(lambda: self.layout_list.removeSelectedLayouts(True))
-        self.listWidget.itemDoubleClicked.connect(self.layout_item.openCurrentLayout)
+        self.listWidget.itemDoubleClicked.connect(self.layout_item.openLayoutItem)
         self.listWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.layout_item.renameLayoutClosedEditor)
@@ -99,7 +99,8 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.layout_list.removeSelectedLayouts(False)
 
     def copyToClipboard(self):
-        if len(self.listWidget.selectedItems()) == 1:
+        selected_items = self.listWidget.selectedItems()
+        if len(selected_items) == 1 and not selected_items[0].isFolder():
             self.context_menu.copyToClipboard()
 
 

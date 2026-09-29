@@ -36,6 +36,22 @@
       <translation>Choisir le dossier où enregistrer les fichiers</translation>
     </message>
     <message>
+      <source>Rename Folder</source>
+      <translation>Renommer</translation>
+    </message>
+    <message>
+      <source>Remove Folder...</source>
+      <translation>Supprimer…</translation>
+    </message>
+    <message>
+      <source>Export Folder as...</source>
+      <translation>Exporter</translation>
+    </message>
+    <message>
+      <source>Choose a file name to export the layout</source>
+      <translation>Choisir un nom de fichier pour exporter la mise en page</translation>
+    </message>
+    <message>
       <source>Open Layout</source>
       <translation>Ouvrir</translation>
     </message>
@@ -64,8 +80,8 @@
       <translation>Exporter</translation>
     </message>
     <message>
-      <source>Choose a file name to export the layout</source>
-      <translation>Choisir un nom de fichier pour exporter la mise en page</translation>
+      <source>Reports cannot be exported from the panel: {names}</source>
+      <translation>Les rapports ne peuvent pas être exportés depuis le panneau : {names}</translation>
     </message>
     <message>
       <source>Save Layout as Template...</source>
@@ -82,10 +98,6 @@
     <message>
       <source>Export Layout as...</source>
       <translation>Exporter</translation>
-    </message>
-    <message>
-      <source>Reports cannot be exported from the panel: {names}</source>
-      <translation>Les rapports ne peuvent pas être exportés depuis le panneau : {names}</translation>
     </message>
     <message>
       <source>{format} format</source>
@@ -168,6 +180,14 @@
       <translation>Rapport</translation>
     </message>
     <message>
+      <source>Remove Folder</source>
+      <translation>Supprimer le dossier</translation>
+    </message>
+    <message>
+      <source>Layout Count: {count}</source>
+      <translation>Nombre de mises en page : {count}</translation>
+    </message>
+    <message>
       <source>Page Count: {count}</source>
       <translation>Nombre de pages : {count}</translation>
     </message>
@@ -186,6 +206,10 @@
     <message>
       <source>Remove Selected Layouts</source>
       <translation>Supprimer les mises en page sélectionnées</translation>
+    </message>
+    <message>
+      <source>Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?</source>
+      <translation>Voulez-vous vraiment supprimer définitivement le dossier « {name} » et ses {count} mises en page ?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

@@ -79,11 +79,13 @@ class Project():
         """return default folder for layout templates"""
         return QDir(QgsApplication.qgisSettingsDirPath()).filePath('composer_templates')
         
-    def createNewLayout(self):
-        """Create a new blank layout"""
+    def createNewLayout(self, folder=''):
+        """Create a new blank layout, in a folder of the panel if given (see modules/layout_list.py)"""
         iterator = 1
         while True:
             layout_name = tr('Layout {number}').format(number=iterator)
+            if folder:
+                layout_name = folder + '/' + layout_name
             if self.project_layout_manager.layoutByName(layout_name) is None:
                 layout = QgsPrintLayout(self.project_instance)
                 layout.initializeDefaults()
