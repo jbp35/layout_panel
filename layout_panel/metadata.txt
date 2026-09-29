@@ -4,7 +4,7 @@ qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Manage print layouts from a panel in the QGIS main window
-version=0.5
+version=1.0.0
 author=Atelier JBP
 email=jbpeter@outlook.com
 
@@ -15,14 +15,16 @@ homepage=https://github.com/jbp35/layout_panel
 
 hasProcessingProvider=no
 changelog=
-      0.5
+      1.0.0
+        * New "Show Layout Map Extents" map tool: shows the extent of every layout map on the canvas with its layout name, click an extent to open its layout, drag its center handle to move it (undoable), right-click to leave the tool
+        * Keyboard shortcuts can be changed in Settings > Keyboard Shortcuts: Ctrl+Alt+L show the panel, Ctrl+Alt+X layout extents tool, and in the layout list Ctrl+N new, Return open, F2 rename, Ctrl+D duplicate, Del remove, Shift+Del remove without confirmation, Ctrl+C copy to clipboard
+        * Fixed Ctrl+D in the panel also removing the current layer in QGIS
         * Fixed crashes when exporting layouts as image or with text annotations (#3, #4)
         * Reports are listed in the panel instead of raising errors (#5)
         * Fixed error when a map has an empty extent (#6)
         * Fixed "Save Layout as Template" error
         * The panel is removed properly when the plugin is unloaded or reloaded
-        * Filter matches layout names literally (special characters no longer break it)
-        * Duplicate layouts shortcut is now Ctrl+D
+        * Filter matches layout names literally (special characters no longer break it), with a placeholder text
         * Removed unused files; only the layout_panel folder is shipped
       0.4
         * Support for QGIS 4 (Qt6)
