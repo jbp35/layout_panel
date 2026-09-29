@@ -1,5 +1,6 @@
 from qgis.PyQt.QtCore import QDir, QFileInfo, QSettings
-from qgis.core import QgsApplication, QgsProject, QgsPrintLayout, QgsSettings, QgsReadWriteContext
+from qgis.core import (QgsApplication, QgsProject, QgsPrintLayout, QgsSettings, QgsReadWriteContext,
+                       QgsLayoutItemMap, QgsCoordinateTransform, QgsCsException)
 from qgis.PyQt import QtXml
 from .i18n import tr
 
@@ -112,6 +113,28 @@ class Project():
                 layout_name = template_name + ' ' + str(iterator)
                 layout.loadFromTemplate(document, QgsReadWriteContext())
                 layout.setName(layout_name)
+                if self.isBundledTemplate(layout_template_path):
+                    self.zoomMapsToCanvas(layout)
                 self.project_layout_manager.addLayout(layout)
                 return
             iterator = iterator + 1
+
+
+    def isBundledTemplate(self, layout_template_path):
+        """Return True if the template is one of the templates shipped with the plugin"""
+        template_dir = QDir(QDir(self.plugin_dir).filePath('templates')).canonicalPath()
+        return QFileInfo(layout_template_path).canonicalPath() == template_dir
+
+
+    def zoomMapsToCanvas(self, layout):
+        """Zoom the maps of a new layout to the map canvas"""
+        canvas = self.parent.iface.mapCanvas()
+        for item in layout.items():
+            if not isinstance(item, QgsLayoutItemMap):
+                continue
+            transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), item.crs(), self.project_instance)
+            try:
+                extent = transform.transformBoundingBox(canvas.extent())
+            except QgsCsException:
+                continue
+            item.zoomToExtent(extent)
