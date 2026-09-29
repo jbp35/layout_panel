@@ -26,6 +26,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon, QAction
 
 from .layout_panel_dockwidget import LayoutPanelDockWidget
+from .modules.shortcuts import registerShortcut, unregisterShortcut
 
 MENU_NAME = '&Layout Panel'
 
@@ -43,6 +44,7 @@ class LayoutPanel:
         icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
         self.action = QAction(QIcon(icon_path), 'Layout Panel', self.iface.mainWindow())
         self.action.triggered.connect(self.run)
+        registerShortcut(self.action, 'mActionLayoutPanel', 'Ctrl+Alt+L')
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu(MENU_NAME, self.action)
 
@@ -53,6 +55,7 @@ class LayoutPanel:
 
     def unload(self):
         """Remove the plugin menu item, icon and dock widget from QGIS GUI."""
+        unregisterShortcut(self.action)
         self.iface.removePluginMenu(MENU_NAME, self.action)
         self.iface.removeToolBarIcon(self.action)
         self.action.deleteLater()

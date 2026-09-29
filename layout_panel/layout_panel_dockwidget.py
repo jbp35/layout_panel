@@ -35,6 +35,7 @@ from .modules.layout_item import LayoutItem
 from .modules.context_menu import ContextMenu
 from .modules.template_menu import TemplateMenu
 from .modules.map_extents import MapExtents
+from .modules.shortcuts import PanelShortcuts
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'layout_panel_dockwidget_base.ui'))
@@ -63,8 +64,9 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.context_menu = ContextMenu(parent=self)
         self.template_menu = TemplateMenu(parent=self)
         self.map_extents = MapExtents(parent=self)
+        self.shortcuts = PanelShortcuts(self)
         
-        #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
+        #Disable edit triggers - F2 shortcut to edit is managed by PanelShortcuts
         self.listWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         
         # Set connections        
@@ -77,29 +79,33 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutList)
 
 
-    def keyPressEvent(self, event):
-        """Keyboard shortcuts: F2 rename, Enter open, Delete remove
-        (Shift+Delete without confirmation), Ctrl+D duplicate"""
-        key = event.key()
-        modifiers = event.modifiers()
+    # Actions of the keyboard shortcuts (see modules/shortcuts.py)
+    def newLayout(self):
+        self.project.createNewLayout()
 
-        if key == Qt.Key.Key_F2:
-            self.layout_item.renameLayout()
-        elif key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
-            self.layout_item.openCurrentLayout()
-        elif key == Qt.Key.Key_Delete:
-            ask_confirmation = not (modifiers & Qt.KeyboardModifier.ShiftModifier)
-            self.layout_list.removeSelectedLayouts(ask_confirmation)
-        elif key == Qt.Key.Key_D and modifiers & Qt.KeyboardModifier.ControlModifier:
-            self.layout_list.duplicateSelectedLayouts()
-        else:
-            super().keyPressEvent(event)
-            return
-        event.accept()
+    def openLayout(self):
+        self.layout_item.openCurrentLayout()
+
+    def renameLayout(self):
+        self.layout_item.renameLayout()
+
+    def duplicateLayouts(self):
+        self.layout_list.duplicateSelectedLayouts()
+
+    def removeLayouts(self):
+        self.layout_list.removeSelectedLayouts(True)
+
+    def removeLayoutsWithoutConfirmation(self):
+        self.layout_list.removeSelectedLayouts(False)
+
+    def copyToClipboard(self):
+        if len(self.listWidget.selectedItems()) == 1:
+            self.context_menu.copyToClipboard()
 
 
     def cleanup(self):
         """Disconnect from QGIS signals and remove canvas items when the plugin is unloaded"""
+        self.shortcuts.cleanup()
         self.project.cleanup()
         self.layout_list.cleanup()
         self.map_extents.cleanup()

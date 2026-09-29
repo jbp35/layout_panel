@@ -6,6 +6,7 @@ from qgis.core import (QgsCoordinateTransform, QgsCsException, QgsGeometry, QgsL
 from qgis.gui import QgsMapCanvasItem, QgsMapTool, QgsMapToolPan
 
 from .icons import icon
+from .shortcuts import registerShortcut, unregisterShortcut
 from .signal_relay import SignalRelay
 
 LINE_COLOR = QColor('#3388ff')
@@ -299,9 +300,13 @@ class MapExtents(QObject):
         self.relay.watch(layout_manager.layoutRenamed)
         self.relay.watch(self.canvas.destinationCrsChanged)
 
-        self.action = QAction(icon('mActionShowLayoutExtents.svg'),
-                              'Show Layout Map Extents (click an extent to open its layout, drag its center to move it, right-click to exit)', self)
+        self.action = QAction(icon('mActionShowLayoutExtents.svg'), 'Layout Panel: Show Layout Map Extents', self)
+        self.action.setToolTip('Show Layout Map Extents (click an extent to open its layout, '
+                               'drag its center to move it, right-click to exit)')
         self.action.setCheckable(True)
+        # also in the main window so its shortcut works while the panel is hidden
+        registerShortcut(self.action, 'mActionLayoutPanelShowMapExtents', 'Ctrl+Alt+X')
+        self.panel.iface.mainWindow().addAction(self.action)
         self.action.triggered.connect(self.activateTool)
         self.map_tool = LayoutExtentsMapTool(self)
         self.map_tool.setAction(self.action)
@@ -352,6 +357,8 @@ class MapExtents(QObject):
     def cleanup(self):
         """Remove the map tool and overlay, and disconnect signals when the plugin is unloaded"""
         self.relay.delete()
+        unregisterShortcut(self.action)
+        self.panel.iface.mainWindow().removeAction(self.action)
         if self.canvas.mapTool() is self.map_tool:
             self.canvas.unsetMapTool(self.map_tool)
         self.hide()
