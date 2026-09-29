@@ -1,5 +1,6 @@
 from qgis.PyQt import QtGui, QtWidgets
 from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo
+from .icons import icon
 
 
 
@@ -27,23 +28,23 @@ class TemplateMenu():
         # list template files in each directory
         for path in search_paths_for_templates:
             template_dir = QDir(path)
-            template_dir.setFilter(QDir.Files)
+            template_dir.setFilter(QDir.Filter.Files)
             template_dir.setNameFilters(["*.qpt", "*.QPT"])
-            template_dir.setSorting(QDir.Time)
+            template_dir.setSorting(QDir.SortFlag.Time)
             
             for template in template_dir.entryList():
                 layout_template_list.append(template_dir.filePath(template))
 
         #if there is no templates to display show a message
         if not layout_template_list:
-            layoutTemplateAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), 'Template folder is empty')
+            layoutTemplateAction = self.template_menu.addAction(icon('mActionNewLayout.svg'), 'Template folder is empty')
             layoutTemplateAction.setEnabled(False)
         
         #add menu action for each template file found
         actions_list = []
         for layout_template_path in layout_template_list:
-            layout_template_action = QtWidgets.QAction(QFileInfo(layout_template_path).baseName(), self.parent)
-            layout_template_action.setIcon(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayoutFromTemplate.svg"))
+            layout_template_action = QtGui.QAction(QFileInfo(layout_template_path).baseName(), self.parent)
+            layout_template_action.setIcon(icon('mActionNewLayoutFromTemplate.svg'))
             layout_template_action.setData(["layoutTemplateAction", layout_template_path])
             actions_list.append(layout_template_action)
         self.template_menu.addActions(actions_list)
@@ -52,7 +53,7 @@ class TemplateMenu():
         self.template_menu.addSeparator()
         selectTemplateAction = self.template_menu.addAction("Choose Another Template File...")
         selectTemplateAction.setData(["selectTemplateAction"])
-        openTemplateFolderAction = self.template_menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconFolder.svg"), "Open Default Template Folder")
+        openTemplateFolderAction = self.template_menu.addAction(icon('mIconFolder.svg'), "Open Default Template Folder")
         openTemplateFolderAction.setData(["openTemplateFolderAction"])
         #TODO: add settings icon
         editTemplatePathsAction = self.template_menu.addAction("Layout Templates Settings...")

@@ -22,13 +22,9 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon, QAction
 from qgis.core import QgsMessageLog
 import time
-
-# Initialize Qt resources from file resources.py
-from .resources import *
 
 # Import the code for the DockWidget
 from .layout_panel_dockwidget import LayoutPanelDockWidget
@@ -67,9 +63,6 @@ class LayoutPanel:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Layout Panel')
-        # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'LayoutPanel')
-        self.toolbar.setObjectName(u'LayoutPanel')
 
         #print "** INITIALIZING LayoutPanel"
 
@@ -159,7 +152,7 @@ class LayoutPanel:
             action.setWhatsThis(whats_this)
 
         if add_to_toolbar:
-            self.toolbar.addAction(action)
+            self.iface.addToolBarIcon(action)
 
         if add_to_menu:
             self.iface.addPluginToMenu(
@@ -172,10 +165,8 @@ class LayoutPanel:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        
-        self.log("init")
-        
-        icon_path = ':/plugins/layout_panel/icon.png'
+
+        icon_path = os.path.join(self.plugin_dir, 'icon.png')
         self.add_action(
             icon_path,
             text=self.tr(u'Layout Panel'),
@@ -186,7 +177,7 @@ class LayoutPanel:
             self.dockwidget = LayoutPanelDockWidget(self.iface, self.iface.mainWindow())
             
         self.dockwidget.closingPlugin.connect(self.onClosePlugin)
-        self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
+        self.iface.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dockwidget)
               
 
     def onClosePlugin(self):
@@ -202,8 +193,6 @@ class LayoutPanel:
                 self.tr(u'&Layout Panel'),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar
 
 
     def run(self):

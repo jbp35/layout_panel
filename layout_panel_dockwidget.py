@@ -24,11 +24,12 @@
 
 import os
 
-from qgis.PyQt import  QtWidgets, uic
+from qgis.PyQt import QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QEvent
-from PyQt5.QtWidgets import QAbstractItemView 
+from qgis.PyQt.QtWidgets import QAbstractItemView
 from qgis.core import QgsMessageLog
 
+from .modules.icons import icon
 from .modules.project import Project
 from .modules.layout_list import LayoutList
 from .modules.layout_item import LayoutItem
@@ -51,7 +52,15 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.setupUi(self)
         self.setObjectName("Layout Panel")
         self.iface = iface
-                               
+
+        # The .ui file still references the old ':/plugins/layout_panel/...'
+        # qrc resource paths (see resources.qrc). These no longer resolve
+        # since the resources are now loaded from disk instead of a
+        # compiled resource file, so the toolbar icons are re-set here.
+        self.pbCreateLayout.setIcon(icon('mActionNewLayout.svg'))
+        self.tbTemplateMenu.setIcon(icon('mIconFolder.svg'))
+        self.pbDeleteLayout.setIcon(icon('mActionDeleteSelected.svg'))
+
         # Initialize modules
         plugin_dir = os.path.dirname(os.path.realpath(__file__))
         self.project = Project(plugin_dir,parent=self)
@@ -62,13 +71,13 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.rubber_band = RubberBand(parent=self)
         
         #Disable edit triggers - F2 shortcut to edit is managed by keyPressEvent
-        self.listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.listWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         
         # Set connections        
         self.pbCreateLayout.clicked.connect(self.project.createNewLayout)
         self.pbDeleteLayout.clicked.connect(lambda: self.layout_list.removeSelectedLayouts(True))
         self.listWidget.itemDoubleClicked.connect(self.layout_item.openCurrentLayout)
-        self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.listWidget.customContextMenuRequested.connect(self.context_menu.openContextMenu)
         self.listWidget.itemDelegate().closeEditor.connect(self.layout_item.renameLayoutClosedEditor)
         self.mLineEdit.valueChanged.connect(self.layout_list.updateLayoutList)
@@ -76,28 +85,28 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     
     # Manage keyboard shortcuts       
     def keyPressEvent(self, event):
-         if (event.type() == QEvent.KeyPress):
+         if (event.type() == QEvent.Type.KeyPress):
             key = event.key()
             modifier = event.modifiers()
 
-            if key == Qt.Key_F2:
+            if key == Qt.Key.Key_F2:
                 self.layout_item.renameLayout()
                 event.accept()
                 
-            if (key == Qt.Key_Enter) or (key == Qt.Key_Return):
+            if (key == Qt.Key.Key_Enter) or (key == Qt.Key.Key_Return):
                 self.layout_item.openCurrentLayout()
                 event.accept()
                 
-            if ( modifier != Qt.ShiftModifier) and key == Qt.Key_Delete:
+            if ( modifier != Qt.KeyboardModifier.ShiftModifier) and key == Qt.Key.Key_Delete:
                 self.layout_list.removeSelectedLayouts()
                 event.accept()
                 
-            if ( modifier == Qt.ShiftModifier) and key == Qt.Key_Delete:
+            if ( modifier == Qt.KeyboardModifier.ShiftModifier) and key == Qt.Key.Key_Delete:
                 self.layout_list.removeSelectedLayouts(False)
                 event.accept()
                 
-            if ( modifier == Qt.ControlModifier) and key == Qt.Key_C:
-                self.layout_item.duplicateLayout()
+            if ( modifier == Qt.KeyboardModifier.ControlModifier) and key == Qt.Key.Key_C:
+                self.layout_list.duplicateSelectedLayouts()
                 event.accept()
     
     

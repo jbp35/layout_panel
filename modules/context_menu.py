@@ -1,6 +1,7 @@
-from qgis.PyQt import QtGui, QtWidgets
+from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import  QDir
 from qgis.core import QgsTask,QgsApplication, QgsLayoutExporter
+from .icons import icon
 
 
 class ContextMenu():
@@ -30,43 +31,43 @@ class ContextMenu():
         
         # Context menu if no layout is selected
         if len(selectedLayouts) == 0: 
-            newLayoutAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), "New Print Layout")
+            newLayoutAction = menu.addAction(icon('mActionNewLayout.svg'), "New Print Layout")
             menu.addSeparator()
             exportMenu = menu.addMenu("Export All Layouts as...")
-            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
-            exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
-            exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"), "Export as SVG")
+            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
+            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
+            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
                 
         # Context menu if only one layout is selected
         elif len(selectedLayouts) == 1:
-            openAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mIconLayout.svg"), "Open Layout")
-            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"), "Duplicate Layout")
-            renameAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionRename.svg"),"Rename Layout")
-            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"),"Remove Layout...")
+            openAction = menu.addAction(icon('mIconLayout.svg'), "Open Layout")
+            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'), "Duplicate Layout")
+            renameAction = menu.addAction(icon('mActionRename.svg'),"Rename Layout")
+            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'),"Remove Layout...")
             #TODO: add icon
             showExtentAction = menu.addAction("Show Layout Extent...")
             menu.addSeparator()
-            saveAsTemplateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveLayoutTemplate.svg"), "Save Layout as Template...")
+            saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), "Save Layout as Template...")
             menu.addSeparator()
             shareToMenu=menu.addMenu("Share to...")
             #TODO: add clipboard icon
             copyToClipboardAction = shareToMenu.addAction( "Copy to clipboard")
             exportMenu=menu.addMenu("Export Layout as...")
-            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
-            exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
-            exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"), "Export as SVG")
+            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
+            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
+            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
 
         # Context menu if multiple layouts are selected
         else:
-            duplicateAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionNewLayout.svg"),"Duplicate Layouts")
-            removeAction = menu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionDeleteSelected.svg"), "Remove Layouts...")
+            duplicateAction = menu.addAction(icon('mActionNewLayout.svg'),"Duplicate Layouts")
+            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), "Remove Layouts...")
             menu.addSeparator()
             exportMenu = menu.addMenu("Export Layouts as...")
-            exportPDFAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsPDF.svg"), "Export as PDF")
-            exportImageAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveMapAsImage.svg"), "Export as Image")
-            exportSvgAction = exportMenu.addAction(QtGui.QIcon(":/plugins/layout_panel/icons/mActionSaveAsSVG.svg"),"Export as SVG")
+            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
+            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
+            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'),"Export as SVG")
         
-        action = menu.exec_(self.parent.listWidget.mapToGlobal(position))
+        action = menu.exec(self.parent.listWidget.mapToGlobal(position))
         if action == None: return
             
         if action == newLayoutAction:
@@ -136,7 +137,7 @@ class ContextMenu():
             for layoutId in range(self.parent.listWidget.count()):
                 layoutList.append(layout_manager.layoutByName(self.parent.listWidget.item(layoutId).text()))
             dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, 'Choose folder to save multiple files',
-                                                               last_used_folder,QtWidgets.QFileDialog.ShowDirsOnly)
+                                                               last_used_folder,QtWidgets.QFileDialog.Option.ShowDirsOnly)
             if dir_name == '' : return
             self.parent.project.setLastExportDir(dir_name)
         
@@ -154,7 +155,7 @@ class ContextMenu():
             for layout in selectedLayouts:
                 layoutList.append(layout_manager.layoutByName(layout.text()))
             dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, 'Choose folder to save multiple files',
-                                                               last_used_folder,QtWidgets.QFileDialog.ShowDirsOnly)
+                                                               last_used_folder,QtWidgets.QFileDialog.Option.ShowDirsOnly)
             
             if dir_name == '' : return 
             self.parent.project.setLastExportDir(dir_name)

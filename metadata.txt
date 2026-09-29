@@ -5,8 +5,9 @@
 [general]
 name=Layout Panel
 qgisMinimumVersion=3.0
-description=Add a panel to manage layouts directly from QGIS main window
-version=0.3
+qgisMaximumVersion=4.99
+description=Upgrade to Qgis 4.x
+version=0.4
 author=Atelier JBP
 email=jbpeter@outlook.com
 

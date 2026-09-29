@@ -3,6 +3,7 @@ import re
 from qgis.PyQt import QtGui, QtWidgets
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsProject,QgsUnitTypes
+from .icons import icon
 
 class LayoutList():
     def __init__(self,parent=None):
@@ -52,8 +53,8 @@ class LayoutList():
 
                 item = QtWidgets.QListWidgetItem()
                 item.setText(layout.name())
-                item.setIcon(QtGui.QIcon(':/plugins/layout_panel/icons/mIconLayout.svg'))
-                item.setFlags(item.flags() | Qt.ItemIsEditable)
+                item.setIcon(icon('mIconLayout.svg'))
+                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
                 item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text} <br> Map Scale: {map_scale}')
                 self.parent.listWidget.addItem(item)
         
@@ -85,12 +86,12 @@ class LayoutList():
                 return
             elif len(selected_items) == 1:
                 ret = qm.question(self.parent, 'Remove Selected Layout',
-                                f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.Yes | qm.No)
+                                f'Are you sure you want to remove permanently "{selected_items[0].text()}" ?', qm.StandardButton.Yes | qm.StandardButton.No)
             else:
                 ret = qm.question(self.parent, 'Remove Selected Layouts',
-                                f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.Yes | qm.No)
+                                f'Are you sure you want to remove permanently {len(selected_items)} layouts?', qm.StandardButton.Yes | qm.StandardButton.No)
         
-            if ret == qm.No:
+            if ret == qm.StandardButton.No:
                 return
             
         layout_names = []
