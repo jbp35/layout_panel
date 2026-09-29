@@ -4,7 +4,7 @@ qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Manage print layouts from a panel in the QGIS main window
-version=1.0.0
+version=1.1.0
 author=Atelier JBP
 email=jbpeter@outlook.com
 
@@ -15,6 +15,11 @@ homepage=https://github.com/jbp35/layout_panel
 
 hasProcessingProvider=no
 changelog=
+      1.1.0
+        * Layouts can be organised into groups with "/" in their names: "Maps/North/Plan 1" shows as "Plan 1" in the group "North" of the group "Maps"
+        * Groups can be created, renamed, removed and exported (subgroups are recreated as subfolders), with "Create Group..." and "Group Selected..." in the context menu
+        * Drag and drop layouts and groups to move them to another group; renaming a layout to "Group/Name" moves it too
+        * French, Spanish and German translations
       1.0.0
         * New "Show Layout Map Extents" map tool: shows the extent of every layout map on the canvas with its layout name, click an extent to open its layout, drag its center handle to move it (undoable), right-click to leave the tool
         * Keyboard shortcuts can be changed in Settings > Keyboard Shortcuts: Ctrl+Alt+L show the panel, Ctrl+Alt+X layout extents tool, and in the layout list Ctrl+N new, Return open, F2 rename, Ctrl+D duplicate, Del remove, Shift+Del remove without confirmation, Ctrl+C copy to clipboard
