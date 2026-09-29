@@ -1,5 +1,5 @@
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtCore import QUrl, QDir
+from qgis.PyQt.QtCore import Qt, QUrl, QDir, QFileInfo
 from qgis.core import QgsLayoutExporter, QgsReadWriteContext, QgsApplication
 
 class LayoutItem():
@@ -9,6 +9,11 @@ class LayoutItem():
         
         # Used to store the initial name of the layout before entering editor mode
         self.name_before_rename = None
+
+
+    def layoutByName(self, layout_name):
+        """Return the layout (print layout or report) with this name"""
+        return self.parent.project.getLayoutManager().layoutByName(layout_name)
         
     def openCurrentLayout(self):
         """Open currently selected layout in editor"""
@@ -72,35 +77,59 @@ class LayoutItem():
                 self.iface.messageBar().pushSuccess('Save as Template', ' Successfully saved layout template to ' + href)
 
        
-    def exportLayout(self,task,layout, file_name, format):
-        """Export the layout"""
-        export = QgsLayoutExporter(layout)
-        if format == "PDF":
-            export.exportToPdf(file_name, QgsLayoutExporter.PdfExportSettings())
-        elif format == "IMG":
-            export.exportToImage(file_name, QgsLayoutExporter.ImageExportSettings())
-        elif format == "SVG":
-            export.exportToSvg(file_name, QgsLayoutExporter.SvgExportSettings())
-        return file_name
-    
-     
-    def exportLayoutCompleted(self,exception,result=None):
-        """Called when export background task is complete"""
-        if not exception:
-            href = f'<a href="{QUrl.fromLocalFile(result).toString()}">{QDir.toNativeSeparators(result)}</a>'
-            self.parent.iface.messageBar().pushSuccess('Export layout',' Successfully exported layout to ' + href)
-          
-            
-    def copyToClipboard(self,task,layout):
-        """Export selected layout to image"""
-        export = QgsLayoutExporter(layout)
-        image = export.renderPageToImage(0)
-        return layout.name(), image
-        
-    def copyToClipboardCompleted(self,exception,result=None):
-        """Copy the image to the clipboard"""
-        if not exception:
-            self.parent.iface.messageBar().pushSuccess('Copy layout',f' Successfully copied "{result[0]}" to clipboard')
-            app = QtWidgets.QApplication.instance()
-            clipboard = app.clipboard()
-            clipboard.setImage(result[1])
+    def exportLayouts(self, jobs, format):
+        """Export layouts to files.
+
+        Export runs on the main thread: rendering a layout from a background
+        task is not thread-safe and crashes QGIS (issues #3 and #4).
+
+        :param jobs: list of (layout, file_name) tuples
+        :param format: "PDF", "IMG" or "SVG"
+        """
+        progress = QtWidgets.QProgressDialog('Exporting layouts...', 'Cancel', 0, len(jobs), self.parent)
+        progress.setWindowTitle('Export layout')
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setMinimumDuration(500)
+
+        exported = []
+        errors = []
+        for index, (layout, file_name) in enumerate(jobs):
+            if progress.wasCanceled():
+                break
+            progress.setLabelText(f'Exporting "{layout.name()}"...')
+            progress.setValue(index)
+
+            exporter = QgsLayoutExporter(layout)
+            if format == "PDF":
+                result = exporter.exportToPdf(file_name, QgsLayoutExporter.PdfExportSettings())
+            elif format == "IMG":
+                result = exporter.exportToImage(file_name, QgsLayoutExporter.ImageExportSettings())
+            else:
+                result = exporter.exportToSvg(file_name, QgsLayoutExporter.SvgExportSettings())
+
+            if result == QgsLayoutExporter.ExportResult.Success:
+                exported.append(file_name)
+            else:
+                errors.append(f'"{layout.name()}": {exporter.errorMessage() or result.name}')
+        progress.setValue(len(jobs))
+
+        message_bar = self.parent.iface.messageBar()
+        if errors:
+            message_bar.pushCritical('Export layout', 'Failed to export ' + '; '.join(errors))
+        if len(exported) == 1:
+            href = f'<a href="{QUrl.fromLocalFile(exported[0]).toString()}">{QDir.toNativeSeparators(exported[0])}</a>'
+            message_bar.pushSuccess('Export layout', ' Successfully exported layout to ' + href)
+        elif exported:
+            folder = QFileInfo(exported[0]).absolutePath()
+            href = f'<a href="{QUrl.fromLocalFile(folder).toString()}">{QDir.toNativeSeparators(folder)}</a>'
+            message_bar.pushSuccess('Export layout', f' Successfully exported {len(exported)} layouts to ' + href)
+
+
+    def copyToClipboard(self, layout):
+        """Copy the first page of the layout to the clipboard as an image"""
+        image = QgsLayoutExporter(layout).renderPageToImage(0)
+        if image.isNull():
+            self.parent.iface.messageBar().pushWarning('Copy layout', f' Failed to copy "{layout.name()}" to clipboard')
+            return
+        QtWidgets.QApplication.clipboard().setImage(image)
+        self.parent.iface.messageBar().pushSuccess('Copy layout', f' Successfully copied "{layout.name()}" to clipboard')

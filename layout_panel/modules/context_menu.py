@@ -1,14 +1,15 @@
 from qgis.PyQt import QtWidgets
-from qgis.PyQt.QtCore import  QDir
-from qgis.core import QgsTask, QgsApplication
+from qgis.PyQt.QtCore import QDir
+from qgis.core import QgsPrintLayout
 from .icons import icon
+
+IMAGE_FORMATS = ['png', 'jpg', 'jpeg', 'bmp', 'tif', 'tiff', 'webp', 'ppm', 'xpm', 'xbm', 'pbm', 'pgm']
 
 
 class ContextMenu():
     def __init__(self,parent=None):
         """Initialize the context menu list"""
         self.parent = parent
-        self.task_list = []
         
     
     def openContextMenu(self, position):
@@ -44,18 +45,19 @@ class ContextMenu():
             duplicateAction = menu.addAction(icon('mActionNewLayout.svg'), "Duplicate Layout")
             renameAction = menu.addAction(icon('mActionRename.svg'),"Rename Layout")
             removeAction = menu.addAction(icon('mActionDeleteSelected.svg'),"Remove Layout...")
-            #TODO: add icon
-            showExtentAction = menu.addAction("Show Layout Extent...")
-            menu.addSeparator()
-            saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), "Save Layout as Template...")
-            menu.addSeparator()
-            shareToMenu=menu.addMenu("Share to...")
-            #TODO: add clipboard icon
-            copyToClipboardAction = shareToMenu.addAction( "Copy to clipboard")
-            exportMenu=menu.addMenu("Export Layout as...")
-            exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
-            exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
-            exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
+            # Reports only support open, duplicate, rename and remove
+            layout = self.parent.layout_item.layoutByName(selectedLayouts[0].text())
+            if isinstance(layout, QgsPrintLayout):
+                showExtentAction = menu.addAction("Show Layout Extent...")
+                menu.addSeparator()
+                saveAsTemplateAction = menu.addAction(icon('mActionSaveLayoutTemplate.svg'), "Save Layout as Template...")
+                menu.addSeparator()
+                shareToMenu=menu.addMenu("Share to...")
+                copyToClipboardAction = shareToMenu.addAction( "Copy to clipboard")
+                exportMenu=menu.addMenu("Export Layout as...")
+                exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), "Export as PDF")
+                exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), "Export as Image")
+                exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), "Export as SVG")
 
         # Context menu if multiple layouts are selected
         else:
@@ -98,78 +100,66 @@ class ContextMenu():
 
     def copyToClipboard(self):
         """Copy selected layout to clipboard"""
-        layout_manager= self.parent.project.getLayoutManager()
-        selectedLayouts = self.parent.listWidget.selectedItems()
-        layout = layout_manager.layoutByName(selectedLayouts[0].text())
-        self.task = QgsTask.fromFunction('Copy to clipboard: ' + layout.name(), 
-                                         self.parent.layout_item.copyToClipboard, 
-                                         on_finished=self.parent.layout_item.copyToClipboardCompleted,
-                                         layout=layout)
-        QgsApplication.taskManager().addTask(self.task)
-    
-             
+        layout = self.parent.layout_item.layoutByName(self.parent.listWidget.selectedItems()[0].text())
+        self.parent.layout_item.copyToClipboard(layout)
+
+
     def exportSelectedLayouts(self, format):
-        """Export selected layouts"""
-        
+        """Export selected layouts, or all layouts if nothing is selected"""
+
         if format == "PDF":
             default_extension = '.pdf'
             extension_filter = 'PDF files (*.pdf *.PDF)'
             default_filter = 'PDF files (*.pdf *.PDF)'
         elif format == "IMG":
             default_extension = '.png'
-            extension_filter = 'PNG format (*.png *.PNG);;BMP format (*.bmp *.BMP);;CUR format (*.cur *.CUR);;ICNS format (*.icns *.ICNS);;ICO format (*.ico *.ICO)' \
-                            'JPEG format (*.jpeg *.JPEG);;JPG format (*.jpg *.JPG);;PBM format (*.pbm *.PBM);;PGM format (*.pgm *.PGM);;PPM format (*.ppm *.PPM)' \
-                            'TIF format (*.tif *.TIF);;TIFF format (*.tiff *.TIFF);;WBMP format (*.wbmp *.WBMP);;WEBP format (*.webp *.WEBP);;WBM format (*.wbm *.XBM);;XPM format (*.xpm *.XPM)'
+            extension_filter = ';;'.join(f'{fmt.upper()} format (*.{fmt} *.{fmt.upper()})' for fmt in IMAGE_FORMATS)
             default_filter = 'PNG format (*.png *.PNG)'
         elif format == "SVG":
             default_extension = '.svg'
             extension_filter = 'SVG format (*.svg *.SVG)'
-            default_filter = 'SVG format (*.svg *.SVG)'  
-        else: return
-        
-        layout_manager= self.parent.project.getLayoutManager()
-        last_used_folder=self.parent.project.getLastUsedFolder()
-        layoutList = []
-        selectedLayouts = self.parent.listWidget.selectedItems()
-        
-        # If nothing is selected, ask for destination folder and export all layouts
-        if len(selectedLayouts) == 0:
-            for layoutId in range(self.parent.listWidget.count()):
-                layoutList.append(layout_manager.layoutByName(self.parent.listWidget.item(layoutId).text()))
-            dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, 'Choose folder to save multiple files',
-                                                               last_used_folder,QtWidgets.QFileDialog.Option.ShowDirsOnly)
-            if dir_name == '' : return
-            self.parent.project.setLastExportDir(dir_name)
-        
-        # If only one layout is selected, ask file name and export layout
-        elif len(selectedLayouts) == 1:  
-            layout = (layout_manager.layoutByName(selectedLayouts[0].text()))
-            layoutList.append(layout)
-            file_name = QtWidgets.QFileDialog.getSaveFileName(self.parent, 'Choose a file name to save the layout as SVG',
-                                                          QDir(last_used_folder).filePath(layout.name() + default_extension), extension_filter, default_filter)[0]
-            if file_name == '' : return
+            default_filter = 'SVG format (*.svg *.SVG)'
+        else:
+            return
+
+        last_used_folder = self.parent.project.getLastUsedFolder()
+        selected_items = self.parent.listWidget.selectedItems()
+        if selected_items:
+            layout_names = [item.text() for item in selected_items]
+        else:
+            layout_names = [self.parent.listWidget.item(row).text() for row in range(self.parent.listWidget.count())]
+
+        # Reports cannot be exported with QgsLayoutExporter
+        layouts = []
+        skipped = []
+        for layout_name in layout_names:
+            layout = self.parent.layout_item.layoutByName(layout_name)
+            if isinstance(layout, QgsPrintLayout):
+                layouts.append(layout)
+            else:
+                skipped.append(layout_name)
+        if skipped:
+            self.parent.iface.messageBar().pushWarning('Export layout', 'Reports cannot be exported from the panel: ' + ', '.join(skipped))
+        if not layouts:
+            return
+
+        # A single layout: ask for a file name
+        if len(selected_items) == 1:
+            file_name = QtWidgets.QFileDialog.getSaveFileName(self.parent, 'Choose a file name to export the layout',
+                                                              QDir(last_used_folder).filePath(layouts[0].name() + default_extension),
+                                                              extension_filter, default_filter)[0]
+            if file_name == '':
+                return
             self.parent.project.setLastExportDir(file_name)
-            
-        # Multiple selection, ask for destination folder and export selected layouts
-        else: 
-            for layout in selectedLayouts:
-                layoutList.append(layout_manager.layoutByName(layout.text()))
+            jobs = [(layouts[0], file_name)]
+
+        # Several layouts: ask for a destination folder
+        else:
             dir_name = QtWidgets.QFileDialog.getExistingDirectory(self.parent, 'Choose folder to save multiple files',
-                                                               last_used_folder,QtWidgets.QFileDialog.Option.ShowDirsOnly)
-            
-            if dir_name == '' : return 
+                                                                  last_used_folder, QtWidgets.QFileDialog.Option.ShowDirsOnly)
+            if dir_name == '':
+                return
             self.parent.project.setLastExportDir(dir_name)
-        
-        # Export the layouts one by one in seperate qgs background tasks      
-        for layout in layoutList:
-            if len(selectedLayouts) != 1: 
-                file_name = QDir(dir_name).filePath(layout.name() + default_extension)
-            
-            #task must be stored permanently to avoid auto cleaning
-            self.task_list.append(QgsTask.fromFunction('Export layout: ' + layout.name(), 
-                                         self.parent.layout_item.exportLayout, 
-                                         on_finished=self.parent.layout_item.exportLayoutCompleted,
-                                         layout=layout,
-                                         file_name=file_name,
-                                         format=format))
-            QgsApplication.taskManager().addTask(self.task_list[-1])
+            jobs = [(layout, QDir(dir_name).filePath(layout.name() + default_extension)) for layout in layouts]
+
+        self.parent.layout_item.exportLayouts(jobs, format)

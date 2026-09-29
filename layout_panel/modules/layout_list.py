@@ -1,8 +1,9 @@
+import math
 import re
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsProject,QgsUnitTypes
+from qgis.core import QgsApplication, QgsPrintLayout, QgsProject, QgsUnitTypes
 from .icons import icon
 
 class LayoutList():
@@ -27,43 +28,54 @@ class LayoutList():
             .replace(")",r"\)").replace("?", r"\?").replace("[", r"\[").replace("]", r"\]")
         
         for layout in self.layout_list:
-            # necessary to ensure that tooltips are updated when layout format or page count changes
-            layout.pageCollection().changed.connect(self.updateLayoutList)
+            # Reports (QgsReport) have no page collection of their own
+            is_print_layout = isinstance(layout, QgsPrintLayout)
+            if is_print_layout:
+                # necessary to ensure that tooltips are updated when layout format or page count changes
+                layout.pageCollection().changed.connect(self.updateLayoutList)
             match = bool(re.search(search_value, layout.name(), re.IGNORECASE))
-            if match:
-                layout = layout_manager.layoutByName(layout.name())
-                layout_page_collection = layout.pageCollection()
-                page_count = layout_page_collection.pageCount()
-                
-                #page size
-                if layout_page_collection.hasUniformPageSizes():
-                    page_size = layout_page_collection.maximumPageSize()
-                    units = QgsUnitTypes.encodeUnit(layout.units())
-                    page_size_text = f'{page_size.width()}x{page_size.height()} {units}'
-                else:
-                    page_size_text = 'variable'
-                
-                # map scale
-                #TODO : update list when layout changes
-                reference_map=layout.referenceMap()
-                if reference_map:
-                    map_scale=f'1:{round(reference_map.scale())}'
-                else:
-                    map_scale="Unknown"
+            if not match:
+                continue
 
-                item = QtWidgets.QListWidgetItem()
-                item.setText(layout.name())
+            item = QtWidgets.QListWidgetItem()
+            item.setText(layout.name())
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
+            if is_print_layout:
                 item.setIcon(icon('mIconLayout.svg'))
-                item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)
-                item.setToolTip(f'Page Count: {page_count} <br> Page Size: {page_size_text} <br> Map Scale: {map_scale}')
-                self.parent.listWidget.addItem(item)
+                item.setToolTip(self.layoutToolTip(layout))
+            else:
+                item.setIcon(QgsApplication.getThemeIcon('/mIconReport.svg'))
+                item.setToolTip('Report')
+            self.parent.listWidget.addItem(item)
         
         #Disable delete button if there are no layouts in the list
         if len(self.layout_list) == 0:
             self.parent.pbDeleteLayout.setEnabled(False)
         else:
             self.parent.pbDeleteLayout.setEnabled(True)
-      
+
+
+    @staticmethod
+    def layoutToolTip(layout):
+        """Return the tooltip describing a print layout"""
+        layout_page_collection = layout.pageCollection()
+        page_count = layout_page_collection.pageCount()
+
+        if layout_page_collection.hasUniformPageSizes():
+            page_size = layout_page_collection.maximumPageSize()
+            units = QgsUnitTypes.encodeUnit(layout.units())
+            page_size_text = f'{page_size.width()}x{page_size.height()} {units}'
+        else:
+            page_size_text = 'variable'
+
+        # The scale is NaN or infinite when the map has an empty extent
+        map_scale = 'Unknown'
+        reference_map = layout.referenceMap()
+        if reference_map and math.isfinite(reference_map.scale()):
+            map_scale = f'1:{round(reference_map.scale())}'
+
+        return f'Page Count: {page_count} <br> Page Size: {page_size_text} <br> Map Scale: {map_scale}'
+
             
     def duplicateSelectedLayouts(self):
         """Duplicate one or multiple selected layouts"""
