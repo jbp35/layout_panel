@@ -21,6 +21,7 @@
 """
 import os
 
+from qgis.PyQt import sip
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QIcon, QAction
 
@@ -60,7 +61,9 @@ class LayoutPanel:
         if self.dockwidget is not None:
             self.dockwidget.cleanup()
             self.iface.removeDockWidget(self.dockwidget)
-            self.dockwidget.deleteLater()
+            # delete now rather than with deleteLater(): the old panel must be gone
+            # before a reload creates the new one (Plugin Reloader flags it otherwise)
+            sip.delete(self.dockwidget)
             self.dockwidget = None
 
     def run(self):
