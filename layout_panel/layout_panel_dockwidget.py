@@ -27,7 +27,6 @@ import os
 from qgis.PyQt import QtWidgets, uic
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QAbstractItemView
-from qgis.core import QgsApplication
 
 from .modules.icons import icon
 from .modules.project import Project
@@ -55,7 +54,6 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.pbCreateLayout.setIcon(icon('mActionNewLayout.svg'))
         self.tbTemplateMenu.setIcon(icon('mIconFolder.svg'))
         self.pbDeleteLayout.setIcon(icon('mActionDeleteSelected.svg'))
-        self.tbShowExtents.setIcon(QgsApplication.getThemeIcon('/mLayoutItemMap.svg'))
 
         # Initialize modules
         plugin_dir = os.path.dirname(os.path.realpath(__file__))
