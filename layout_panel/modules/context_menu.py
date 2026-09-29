@@ -21,6 +21,8 @@ class ContextMenu():
         
         newLayoutAction = None
         newLayoutInFolderAction = None
+        createGroupAction = None
+        groupSelectedAction = None
         openAction = None
         duplicateAction = None
         renameAction = None
@@ -35,6 +37,7 @@ class ContextMenu():
         # Context menu if no layout is selected
         if len(selectedLayouts) == 0: 
             newLayoutAction = menu.addAction(icon('mActionNewLayout.svg'), tr("New Print Layout"))
+            createGroupAction = menu.addAction(icon('mIconFolder.svg'), tr("Create Group..."))
             menu.addSeparator()
             exportMenu = menu.addMenu(tr("Export All Layouts as..."))
             exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
@@ -44,10 +47,13 @@ class ContextMenu():
         # Context menu if only one folder is selected
         elif len(selectedLayouts) == 1 and selectedLayouts[0].isFolder():
             newLayoutInFolderAction = menu.addAction(icon('mActionNewLayout.svg'), tr("New Print Layout"))
-            renameAction = menu.addAction(icon('mActionRename.svg'), tr("Rename Folder"))
-            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), tr("Remove Folder..."))
+            createGroupAction = menu.addAction(icon('mIconFolder.svg'), tr("Create Group..."))
             menu.addSeparator()
-            exportMenu = menu.addMenu(tr("Export Folder as..."))
+            renameAction = menu.addAction(icon('mActionRename.svg'), tr("Rename Group"))
+            removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), tr("Remove Group..."))
+            groupSelectedAction = menu.addAction(icon('mIconFolder.svg'), tr("Group Selected..."))
+            menu.addSeparator()
+            exportMenu = menu.addMenu(tr("Export Group as..."))
             exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
             exportImageAction = exportMenu.addAction(icon('mActionSaveMapAsImage.svg'), tr("Export as Image"))
             exportSvgAction = exportMenu.addAction(icon('mActionSaveAsSVG.svg'), tr("Export as SVG"))
@@ -58,6 +64,7 @@ class ContextMenu():
             duplicateAction = menu.addAction(icon('mActionNewLayout.svg'), tr("Duplicate Layout"))
             renameAction = menu.addAction(icon('mActionRename.svg'),tr("Rename Layout"))
             removeAction = menu.addAction(icon('mActionDeleteSelected.svg'),tr("Remove Layout..."))
+            groupSelectedAction = menu.addAction(icon('mIconFolder.svg'), tr("Group Selected..."))
             # Reports only support open, duplicate, rename and remove
             layout = self.parent.layout_item.currentLayout()
             if isinstance(layout, QgsPrintLayout):
@@ -75,6 +82,7 @@ class ContextMenu():
         else:
             duplicateAction = menu.addAction(icon('mActionNewLayout.svg'),tr("Duplicate Layouts"))
             removeAction = menu.addAction(icon('mActionDeleteSelected.svg'), tr("Remove Layouts..."))
+            groupSelectedAction = menu.addAction(icon('mIconFolder.svg'), tr("Group Selected..."))
             menu.addSeparator()
             exportMenu = menu.addMenu(tr("Export Layouts as..."))
             exportPDFAction = exportMenu.addAction(icon('mActionSaveAsPDF.svg'), tr("Export as PDF"))
@@ -88,6 +96,10 @@ class ContextMenu():
             self.parent.project.createNewLayout()
         elif action == newLayoutInFolderAction:
             self.parent.project.createNewLayout(selectedLayouts[0].data(0, FOLDER_PATH_ROLE))
+        elif action == createGroupAction:
+            self.parent.layout_list.createGroup()
+        elif action == groupSelectedAction:
+            self.parent.layout_list.groupSelected()
         elif action == removeAction:
             self.parent.layout_list.removeSelectedLayouts()
         elif action == openAction:

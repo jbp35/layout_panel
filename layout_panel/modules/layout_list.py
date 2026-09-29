@@ -12,6 +12,9 @@ from .signal_relay import SignalRelay
 # The QGIS layout manager has no folders, so folders only exist in the panel.
 LAYOUT_NAME_ROLE = Qt.ItemDataRole.UserRole
 FOLDER_PATH_ROLE = Qt.ItemDataRole.UserRole + 1
+# Folders created empty with "Create Group..." are saved in the project until they get a layout
+GROUPS_SCOPE = 'LayoutPanel'
+GROUPS_KEY = 'emptyGroups'
 
 
 def splitName(name):
@@ -77,13 +80,12 @@ class DropHandler(QObject):
                 target_folder = splitName(target_item.data(0, FOLDER_PATH_ROLE))
             else:
                 target_folder = self.layout_list.itemFolder(target_item)
-            items = tree.selectedItems()
+            entries = self.layout_list.itemEntries(tree.selectedItems())
             # Ignore the drop so Qt does not move the items itself: the tree is
             # rebuilt from the new layout names once the drag is over
             event.setDropAction(Qt.DropAction.IgnoreAction)
             event.accept()
-            moves = self.layout_list.moveItems(items, target_folder)
-            QTimer.singleShot(0, lambda: self.layout_list.renameLayouts(moves))
+            QTimer.singleShot(0, lambda: self.layout_list.moveEntries(entries, target_folder))
             return True
         return False
 
@@ -119,6 +121,9 @@ class LayoutList():
         self.relay.watch(layout_manager.layoutAdded)
         self.relay.watch(layout_manager.layoutRemoved)
         self.relay.watch(layout_manager.layoutRenamed)
+        # The empty groups are saved in the project
+        self.relay.watch(QgsProject.instance().readProject)
+        self.relay.watch(QgsProject.instance().cleared)
 
         self.updateLayoutList()
 
@@ -137,6 +142,15 @@ class LayoutList():
         layouts = layout_manager.layouts()
         search_value = self.parent.mLineEdit.value().lower()
         folders = {}
+
+        # Empty groups that got a layout are ordinary folders now
+        layout_folders = [folderParts(layout.name()) for layout in layouts]
+        groups = [group for group in self.emptyGroups()
+                  if not any(folder[:len(splitName(group))] == splitName(group) for folder in layout_folders)]
+        self.setEmptyGroups(groups)
+        for group in groups:
+            if search_value in group.lower():
+                self.folderItem(splitName(group), folders)
 
         for layout in layouts:
             # Reports (QgsReport) have no page collection of their own
@@ -244,30 +258,45 @@ class LayoutList():
         return self.layoutNames([root.child(index) for index in range(root.childCount())])
 
 
-    def moveItems(self, items, target_folder):
-        """Return the renames moving layouts and folders into a folder
+    def itemEntries(self, items):
+        """Return what the items are: ('layout', name) or ('folder', parts)"""
+        return [('folder', splitName(item.data(0, FOLDER_PATH_ROLE))) if item.isFolder() else ('layout', self.layoutName(item))
+                for item in items]
 
-        :param items: the layout and folder items to move
+
+    def moveEntries(self, entries, target_folder):
+        """Move layouts and folders into a folder
+
+        :param entries: the layouts and folders to move, see itemEntries
         :param target_folder: the parts of the destination folder
-        :returns: list of (old name, new name)
+        :returns: True if they were moved
         """
+        # Layouts hidden by the search are moved with their folder too
+        layout_names = [layout.name() for layout in self.parent.project.getLayoutManager().layouts()]
         moves = []
-        for item in items:
-            name = self.layoutName(item)
-            if name is not None:
-                moves.append((name, joinName(target_folder + [splitName(name)[-1]])))
+        folder_moves = []
+        for kind, value in entries:
+            if kind == 'layout':
+                moves.append((value, joinName(target_folder + [splitName(value)[-1]])))
                 continue
-            folder = splitName(item.data(0, FOLDER_PATH_ROLE))
+            folder = value
             if target_folder[:len(folder)] == folder:
                 continue  # into itself or one of its subfolders
             new_folder = target_folder + [folder[-1]]
-            for name in self.layoutNames([item]):
-                moves.append((name, joinName(new_folder + splitName(name)[len(folder):])))
+            folder_moves.append((folder, new_folder))
+            for name in layout_names:
+                if folderParts(name)[:len(folder)] == folder:
+                    moves.append((name, joinName(new_folder + splitName(name)[len(folder):])))
         # A layout selected with its folder is moved with the folder
         renames = {}
         for old_name, new_name in moves:
             renames.setdefault(old_name, new_name)
-        return [(old_name, new_name) for old_name, new_name in renames.items() if old_name != new_name]
+        if not self.renameLayouts(list(renames.items())):
+            return False
+        for folder, new_folder in folder_moves:
+            self.moveEmptyGroups(folder, new_folder)
+        self.updateLayoutList()
+        return True
 
 
     def renameFolder(self, old_path, new_path):
@@ -280,7 +309,108 @@ class LayoutList():
                  for name in layout_names if folderParts(name)[:len(old_folder)] == old_folder]
         if old_path in self.collapsed_folders:
             self.collapsed_folders.add(joinName(new_folder))
-        return self.renameLayouts(moves)
+        if not self.renameLayouts(moves):
+            return False
+        self.moveEmptyGroups(old_folder, new_folder)
+        return True
+
+
+    @staticmethod
+    def emptyGroups():
+        """Return the paths of the empty groups saved in the project"""
+        return QgsProject.instance().readListEntry(GROUPS_SCOPE, GROUPS_KEY)[0]
+
+
+    def setEmptyGroups(self, groups):
+        """Save the paths of the empty groups in the project"""
+        groups = list(dict.fromkeys(groups))
+        if groups == self.emptyGroups():
+            return
+        if groups:
+            QgsProject.instance().writeEntry(GROUPS_SCOPE, GROUPS_KEY, groups)
+        else:
+            QgsProject.instance().removeEntry(GROUPS_SCOPE, GROUPS_KEY)
+
+
+    def moveEmptyGroups(self, old_folder, new_folder):
+        """Move the empty groups of a folder to a new folder, or remove them if new_folder is None"""
+        groups = []
+        for group in self.emptyGroups():
+            parts = splitName(group)
+            if parts[:len(old_folder)] != old_folder:
+                groups.append(group)
+            elif new_folder is not None:
+                groups.append(joinName(new_folder + parts[len(old_folder):]))
+        self.setEmptyGroups(groups)
+
+
+    def commonFolder(self, items):
+        """Return the parts of the deepest folder containing all the items"""
+        folders = [self.itemFolder(item) for item in items]
+        common_folder = folders[0] if folders else []
+        for folder in folders:
+            while folder[:len(common_folder)] != common_folder:
+                common_folder = common_folder[:-1]
+        return common_folder
+
+
+    def folderPaths(self):
+        """Return the paths of all the folders, empty groups included"""
+        paths = set(self.emptyGroups())
+        for layout in self.parent.project.getLayoutManager().layouts():
+            folder = folderParts(layout.name())
+            for index in range(1, len(folder) + 1):
+                paths.add(joinName(folder[:index]))
+        return paths
+
+
+    def askGroupName(self, title, parent_folder):
+        """Ask the name of a new group in a folder
+
+        :returns: the parts of the new group, or None if cancelled
+        """
+        paths = self.folderPaths()
+        number = 1
+        while joinName(parent_folder + [tr('Group {number}').format(number=number)]) in paths:
+            number += 1
+        name, ok = QtWidgets.QInputDialog.getText(self.parent, title, tr('Group name:'),
+                                                  text=tr('Group {number}').format(number=number))
+        name = name.strip()
+        if not ok or not name.strip('/ '):
+            return None
+        return parent_folder + splitName(name)
+
+
+    def createGroup(self):
+        """Create an empty group, in the selected folder if one is selected"""
+        items = self.tree.selectedItems()
+        parent_folder = splitName(items[0].data(0, FOLDER_PATH_ROLE)) if len(items) == 1 and items[0].isFolder() else []
+        folder = self.askGroupName(tr('Create Group'), parent_folder)
+        if folder is None:
+            return
+        if joinName(folder) not in self.folderPaths():
+            self.setEmptyGroups(self.emptyGroups() + [joinName(folder)])
+        self.collapsed_folders.difference_update(joinName(folder[:index]) for index in range(1, len(folder) + 1))
+        self.updateLayoutList()
+
+
+    def groupSelected(self):
+        """Move the selected layouts and folders into a new group"""
+        items = self.tree.selectedItems()
+        if not items:
+            return
+        entries = self.itemEntries(items)
+        folder = self.askGroupName(tr('Group Selected'), self.commonFolder(items))
+        if folder is None:
+            return
+        self.collapsed_folders.discard(joinName(folder))
+        # Keep the new group if only empty groups were moved into it
+        added = joinName(folder) not in self.folderPaths()
+        if added:
+            self.setEmptyGroups(self.emptyGroups() + [joinName(folder)])
+        if not self.moveEntries(entries, folder) and added:
+            self.setEmptyGroups([group for group in self.emptyGroups() if group != joinName(folder)])
+            self.updateLayoutList()
 
 
     def renameLayouts(self, renames):
@@ -345,12 +475,16 @@ class LayoutList():
         selected_items = self.tree.selectedItems()
         layout_names = self.selectedLayoutNames()
         if not layout_names:
+            # Empty groups are removed without confirmation
+            for item in selected_items:
+                self.moveEmptyGroups(splitName(item.data(0, FOLDER_PATH_ROLE)), None)
+            self.updateLayoutList()
             return
         if askConfirmation:
             qm = QtWidgets.QMessageBox
             if len(selected_items) == 1 and selected_items[0].isFolder():
-                ret = qm.question(self.parent, tr('Remove Folder'),
-                                tr('Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?').format(
+                ret = qm.question(self.parent, tr('Remove Group'),
+                                tr('Are you sure you want to remove permanently the group "{name}" and its {count} layouts?').format(
                                     name=selected_items[0].data(0, FOLDER_PATH_ROLE), count=len(layout_names)),
                                 qm.StandardButton.Yes | qm.StandardButton.No)
             elif len(layout_names) == 1:
@@ -363,5 +497,8 @@ class LayoutList():
             if ret == qm.StandardButton.No:
                 return
 
+        for item in selected_items:
+            if item.isFolder():
+                self.moveEmptyGroups(splitName(item.data(0, FOLDER_PATH_ROLE)), None)
         for layout_name in layout_names:
             self.parent.layout_item.removeLayout(layout_name)

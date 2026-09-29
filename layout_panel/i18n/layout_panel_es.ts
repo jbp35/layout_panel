@@ -8,6 +8,10 @@
       <translation>Nuevo diseño de impresión</translation>
     </message>
     <message>
+      <source>Create Group...</source>
+      <translation>Crear grupo…</translation>
+    </message>
+    <message>
       <source>Export All Layouts as...</source>
       <translation>Exportar todo</translation>
     </message>
@@ -36,15 +40,19 @@
       <translation>Elegir la carpeta donde guardar los archivos</translation>
     </message>
     <message>
-      <source>Rename Folder</source>
+      <source>Rename Group</source>
       <translation>Renombrar</translation>
     </message>
     <message>
-      <source>Remove Folder...</source>
+      <source>Remove Group...</source>
       <translation>Eliminar…</translation>
     </message>
     <message>
-      <source>Export Folder as...</source>
+      <source>Group Selected...</source>
+      <translation>Agrupar selección…</translation>
+    </message>
+    <message>
+      <source>Export Group as...</source>
       <translation>Exportar</translation>
     </message>
     <message>
@@ -172,6 +180,18 @@
       <translation>Desconocida</translation>
     </message>
     <message>
+      <source>Group name:</source>
+      <translation>Nombre del grupo:</translation>
+    </message>
+    <message>
+      <source>Create Group</source>
+      <translation>Crear grupo</translation>
+    </message>
+    <message>
+      <source>Group Selected</source>
+      <translation>Agrupar selección</translation>
+    </message>
+    <message>
       <source>variable</source>
       <translation>variable</translation>
     </message>
@@ -180,12 +200,16 @@
       <translation>Informe</translation>
     </message>
     <message>
-      <source>Remove Folder</source>
-      <translation>Eliminar la carpeta</translation>
+      <source>Remove Group</source>
+      <translation>Eliminar el grupo</translation>
     </message>
     <message>
       <source>Layout Count: {count}</source>
       <translation>Número de diseños: {count}</translation>
+    </message>
+    <message>
+      <source>Group {number}</source>
+      <translation>Grupo {number}</translation>
     </message>
     <message>
       <source>Page Count: {count}</source>
@@ -208,8 +232,8 @@
       <translation>Eliminar los diseños seleccionados</translation>
     </message>
     <message>
-      <source>Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?</source>
-      <translation>¿Seguro que desea eliminar permanentemente la carpeta «{name}» y sus {count} diseños?</translation>
+      <source>Are you sure you want to remove permanently the group "{name}" and its {count} layouts?</source>
+      <translation>¿Seguro que desea eliminar permanentemente el grupo «{name}» y sus {count} diseños?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>

@@ -8,6 +8,10 @@
       <translation>Nouvelle mise en page</translation>
     </message>
     <message>
+      <source>Create Group...</source>
+      <translation>Créer un groupe…</translation>
+    </message>
+    <message>
       <source>Export All Layouts as...</source>
       <translation>Tout exporter</translation>
     </message>
@@ -36,15 +40,19 @@
       <translation>Choisir le dossier où enregistrer les fichiers</translation>
     </message>
     <message>
-      <source>Rename Folder</source>
+      <source>Rename Group</source>
       <translation>Renommer</translation>
     </message>
     <message>
-      <source>Remove Folder...</source>
+      <source>Remove Group...</source>
       <translation>Supprimer…</translation>
     </message>
     <message>
-      <source>Export Folder as...</source>
+      <source>Group Selected...</source>
+      <translation>Grouper la sélection…</translation>
+    </message>
+    <message>
+      <source>Export Group as...</source>
       <translation>Exporter</translation>
     </message>
     <message>
@@ -172,6 +180,18 @@
       <translation>Inconnue</translation>
     </message>
     <message>
+      <source>Group name:</source>
+      <translation>Nom du groupe :</translation>
+    </message>
+    <message>
+      <source>Create Group</source>
+      <translation>Créer un groupe</translation>
+    </message>
+    <message>
+      <source>Group Selected</source>
+      <translation>Grouper la sélection</translation>
+    </message>
+    <message>
       <source>variable</source>
       <translation>variable</translation>
     </message>
@@ -180,12 +200,16 @@
       <translation>Rapport</translation>
     </message>
     <message>
-      <source>Remove Folder</source>
-      <translation>Supprimer le dossier</translation>
+      <source>Remove Group</source>
+      <translation>Supprimer le groupe</translation>
     </message>
     <message>
       <source>Layout Count: {count}</source>
       <translation>Nombre de mises en page : {count}</translation>
+    </message>
+    <message>
+      <source>Group {number}</source>
+      <translation>Groupe {number}</translation>
     </message>
     <message>
       <source>Page Count: {count}</source>
@@ -208,8 +232,8 @@
       <translation>Supprimer les mises en page sélectionnées</translation>
     </message>
     <message>
-      <source>Are you sure you want to remove permanently the folder "{name}" and its {count} layouts?</source>
-      <translation>Voulez-vous vraiment supprimer définitivement le dossier « {name} » et ses {count} mises en page ?</translation>
+      <source>Are you sure you want to remove permanently the group "{name}" and its {count} layouts?</source>
+      <translation>Voulez-vous vraiment supprimer définitivement le groupe « {name} » et ses {count} mises en page ?</translation>
     </message>
     <message>
       <source>Are you sure you want to remove permanently "{name}" ?</source>
