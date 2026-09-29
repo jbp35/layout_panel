@@ -231,3 +231,5 @@ fabric.properties
 
 # Local MCP config (contains a token)
 .mcp.json
+.idea/
+dist/

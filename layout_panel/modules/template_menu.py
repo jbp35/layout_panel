@@ -3,7 +3,6 @@ from qgis.PyQt.QtCore import QDir, QUrl,QFileInfo
 from .icons import icon
 
 
-
 class TemplateMenu():
     def __init__(self,parent=None):
         """Initialize the template menu"""

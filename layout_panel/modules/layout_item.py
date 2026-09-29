@@ -1,6 +1,6 @@
-from qgis.PyQt import QtWidgets, QtXml
-from qgis.PyQt.QtCore import  QUrl, QDir, QFileInfo
-from qgis.core import QgsPrintLayout, QgsLayoutExporter,  QgsReadWriteContext, QgsApplication
+from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtCore import QUrl, QDir
+from qgis.core import QgsLayoutExporter, QgsReadWriteContext, QgsApplication
 
 class LayoutItem():
     def __init__(self,parent=None):

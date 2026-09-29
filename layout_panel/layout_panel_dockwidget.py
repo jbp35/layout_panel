@@ -27,7 +27,6 @@ import os
 from qgis.PyQt import QtWidgets, uic
 from qgis.PyQt.QtCore import pyqtSignal, Qt, QEvent
 from qgis.PyQt.QtWidgets import QAbstractItemView
-from qgis.core import QgsMessageLog
 
 from .modules.icons import icon
 from .modules.project import Project
@@ -53,10 +52,7 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.setObjectName("Layout Panel")
         self.iface = iface
 
-        # The .ui file still references the old ':/plugins/layout_panel/...'
-        # qrc resource paths (see resources.qrc). These no longer resolve
-        # since the resources are now loaded from disk instead of a
-        # compiled resource file, so the toolbar icons are re-set here.
+        # Icons are loaded from disk (see modules/icons.py)
         self.pbCreateLayout.setIcon(icon('mActionNewLayout.svg'))
         self.tbTemplateMenu.setIcon(icon('mIconFolder.svg'))
         self.pbDeleteLayout.setIcon(icon('mActionDeleteSelected.svg'))
@@ -116,25 +112,3 @@ class LayoutPanelDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         event.accept()
             
     
-    def log(self, msg):
-        """Helper to log msg in QGIS used for debug only"""
-        QgsMessageLog.logMessage(str(msg), "Layout Panel")
-        
-
-        
-    
-        
-
-#TODO: update extent of refence map automatically after creating layout from template              
-#TODO: Show layout extent on canvas/to new layer/ zoom to map extent /mask 
-#TODO: quick print layout?
-#TODO: cleanup the code
-#TODO: update statusbar
-#TODO: standard paper format in tooltip (A4, A3, etc.)
-#TODO: translation TR
-#TODO: Filter tool button? filter by size, page count, expression, etc.
-#TODO: Add support for reports
-#TODO: Support for drag & drop
-#TODO: edit default export settings
-#TODO: icons for layout templates
-#TODO: Export layout list as table

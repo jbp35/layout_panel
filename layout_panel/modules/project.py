@@ -1,5 +1,3 @@
-import os
-
 from qgis.PyQt.QtCore import QDir, QFileInfo,  QSettings
 from qgis.core import QgsApplication, QgsProject, QgsPrintLayout,QgsSettings,QgsReadWriteContext
 from qgis.PyQt import QtXml

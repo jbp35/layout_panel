@@ -1,6 +1,6 @@
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import  QDir
-from qgis.core import QgsTask,QgsApplication, QgsLayoutExporter
+from qgis.core import QgsTask, QgsApplication
 from .icons import icon
 
 

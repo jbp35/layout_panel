@@ -1,6 +1,6 @@
 import re
 
-from qgis.PyQt import QtGui, QtWidgets
+from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsProject,QgsUnitTypes
 from .icons import icon
