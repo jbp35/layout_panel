@@ -1,0 +1,47 @@
+[general]
+name=Layout Panel
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Manage print layouts from a panel in the QGIS main window
+version=1.0.0
+author=Atelier JBP
+email=jbpeter@outlook.com
+
+about=This plugin adds a new panel to manage print layouts directly from QGIS main window. It allows to quickly open, create, rename, delete and filter print layouts without having to open the layout manager. It supports layout templates and also makes it possible to batch export one or multiple layouts to PDF, Image or SVG formats without having to open each print layout.
+tracker=https://github.com/jbp35/layout_panel/issues
+repository=https://github.com/jbp35/layout_panel
+homepage=https://github.com/jbp35/layout_panel
+
+hasProcessingProvider=no
+changelog=
+      1.0.0
+        * New "Show Layout Map Extents" map tool: shows the extent of every layout map on the canvas with its layout name, click an extent to open its layout, drag its center handle to move it (undoable), right-click to leave the tool
+        * Keyboard shortcuts can be changed in Settings > Keyboard Shortcuts: Ctrl+Alt+L show the panel, Ctrl+Alt+X layout extents tool, and in the layout list Ctrl+N new, Return open, F2 rename, Ctrl+D duplicate, Del remove, Shift+Del remove without confirmation, Ctrl+C copy to clipboard
+        * Fixed Ctrl+D in the panel also removing the current layer in QGIS
+        * Fixed crashes when exporting layouts as image or with text annotations (#3, #4)
+        * Reports are listed in the panel instead of raising errors (#5)
+        * Fixed error when a map has an empty extent (#6)
+        * Fixed "Save Layout as Template" error
+        * The panel is removed properly when the plugin is unloaded or reloaded
+        * Filter matches layout names literally (special characters no longer break it), with a placeholder text
+        * Removed unused files; only the layout_panel folder is shipped
+      0.4
+        * Support for QGIS 4 (Qt6)
+      0.3
+        * Reload the panel automatically at QGIS startup
+        * Copy first page of the layout directly to the clipboard
+        * Support keyboard shortcuts to delete and rename (F2)
+        * Added layout template for A3
+        * Export layouts using background tasks
+        * Use QGIS settings to manage search patch for layout templates
+        * Added map scale in tooltip
+        * Added changelog
+        * Refactored the code into modules
+
+tags=Layout, manager, panel, print, composition, batch, export, template
+category=Plugins
+icon=icon.png
+experimental=False
+deprecated=False
+server=False
